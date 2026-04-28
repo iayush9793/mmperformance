@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ET Performance Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --bg-color: #0f172a; /* Slate 900 */
+            --card-bg: #1e293b; /* Slate 800 */
+            --primary: #6366f1;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --border: #334155;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        /* Preloader Styles */
+        #preloader {
+            position: fixed;
+            inset: 0;
+            background: #0f172a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease-out, visibility 0.5s;
+        }
+
+        .preloader-logo {
+            width: 180px; /* Increased from 120px */
+            margin-bottom: 32px;
+            filter: drop-shadow(0 0 15px rgba(99, 102, 241, 0.4));
+        }
+
+        .loader-bar-container {
+            width: 280px;
+            height: 6px;
+            background: #1e293b;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .loader-bar-fill {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 15px var(--primary);
+        }
+
+        /* Dark Glassmorphism */
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .hidden { display: none !important; }
+
+        .status-pill {
+            padding: 4px 12px;
+            border-radius: 99px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid transparent;
+        }
+
+        .view-transition {
+            animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .chart-container {
+            position: relative;
+            height: 250px;
+            width: 100%;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+        input, select {
+            background-color: #1e293b !important;
+            border-color: #334155 !important;
+            color: white !important;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Preloader -->
+    <div id="preloader">
+        <img src="https://image.s7.sfmc-content.com/lib/fe3e11717d64057d751472/m/1/2ddd9d88-4661-43a5-bf8f-809065b48367.png" alt="Logo" class="preloader-logo">
+        <div id="progress-text" class="text-xs font-bold text-slate-400 mb-2 tracking-[0.2em]">INITIALIZING PERFORMANCE TRACKER 0%</div>
+        <div class="loader-bar-container">
+            <div id="loader-fill" class="loader-bar-fill"></div>
+        </div>
+    </div>
+
+    <!-- App Container -->
+    <div id="app" class="min-h-screen pb-12 hidden">
+        
+        <!-- Header -->
+        <header class="sticky top-0 z-40 w-full bg-slate-900/80 backdrop-blur-md border-b border-slate-800">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between"> <!-- Height increased to h-20 -->
+                <div class="flex items-center gap-4" onclick="showView('dashboard')" style="cursor:pointer">
+                    <img src="https://image.s7.sfmc-content.com/lib/fe3e11717d64057d751472/m/1/2ddd9d88-4661-43a5-bf8f-809065b48367.png" alt="Logo" class="h-12 w-auto"> <!-- Height increased to h-12 -->
+                    <span class="font-bold text-white hidden md:block tracking-tight text-xl">Performance Tracker</span>
+                </div>
+                
+                <h1 id="page-title" class="text-lg font-semibold text-slate-200 absolute left-1/2 -translate-x-1/2 hidden lg:block">
+                    Today's Performances
+                </h1>
+
+                <div class="flex items-center gap-4">
+                    <div id="top-revenue-badge" class="hidden lg:flex items-center bg-emerald-500/10 text-emerald-400 px-3 py-1.5 rounded-full text-xs font-bold border border-emerald-500/20">
+                        TOP REVENUE: <span id="top-et-name" class="ml-1 text-white">Loading...</span>
+                    </div>
+                    <button onclick="showView('form')" class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-lg shadow-indigo-600/20 transition-all active:scale-95">
+                        Update Performance
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+            
+            <!-- Dashboard View -->
+            <section id="view-dashboard" class="view-transition">
+                <div id="cards-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <!-- Cards injected here -->
+                </div>
+                <div class="mt-12 flex justify-center">
+                    <button onclick="showView('details')" class="flex items-center gap-2 text-indigo-400 font-bold hover:text-indigo-300 transition-colors py-3 px-8 rounded-full bg-indigo-500/5 border border-indigo-500/20">
+                        Detailed Performance Analytics
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Form View -->
+            <section id="view-form" class="view-transition hidden max-w-2xl mx-auto">
+                <div class="bg-slate-800 rounded-2xl shadow-2xl border border-slate-700 overflow-hidden">
+                    <div class="p-6 border-b border-slate-700 flex justify-between items-center bg-slate-800/50">
+                        <h2 class="text-xl font-bold text-white">Update Performance</h2>
+                        <button onclick="showView('dashboard')" class="text-slate-400 hover:text-white transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
+                    </div>
+                    <form id="performance-form" class="p-6 space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">ET Account</label>
+                                <select id="form-et-name" required class="w-full rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-indigo-500 border transition-all">
+                                    <!-- Populated via JS -->
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Date</label>
+                                <input type="date" id="form-date" required class="w-full rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-indigo-500 border transition-all">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Lowest OR (%)</label>
+                                <input type="number" step="0.01" id="form-low-or" required class="w-full rounded-lg p-2.5 border outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Highest OR (%)</label>
+                                <input type="number" step="0.01" id="form-high-or" required class="w-full rounded-lg p-2.5 border outline-none">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Lowest Del (%)</label>
+                                <input type="number" step="0.01" id="form-low-del" required class="w-full rounded-lg p-2.5 border outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Highest Del (%)</label>
+                                <input type="number" step="0.01" id="form-high-del" required class="w-full rounded-lg p-2.5 border outline-none">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Del Mails Down</label>
+                                <input type="number" id="form-del-down" required class="w-full rounded-lg p-2.5 border outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">OR Mails Down</label>
+                                <input type="number" id="form-or-down" required class="w-full rounded-lg p-2.5 border outline-none">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Revenue ($)</label>
+                                <input type="number" step="0.01" id="form-revenue" required class="w-full rounded-lg p-2.5 border outline-none font-bold text-emerald-400">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Threshold (%)</label>
+                                <input type="number" step="0.1" id="form-threshold" value="85" required class="w-full rounded-lg p-2.5 border outline-none">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Delivery Range</label>
+                            <input type="text" id="form-del-range" placeholder="e.g. 90% - 100%" class="w-full rounded-lg p-2.5 border outline-none">
+                        </div>
+
+                        <div class="pt-6 flex gap-3">
+                            <button type="button" onclick="showView('dashboard')" class="flex-1 px-4 py-3 bg-slate-700 text-slate-300 rounded-lg font-bold hover:bg-slate-600 transition-all">Cancel</button>
+                            <button type="submit" id="submit-btn" class="flex-1 px-4 py-3 bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-500 shadow-lg shadow-indigo-600/20 transition-all">Save Performance</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Details/Performance View -->
+            <section id="view-details" class="view-transition hidden">
+                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-6">
+                    <div>
+                        <h2 class="text-3xl font-bold text-white">Performance History</h2>
+                        <p class="text-slate-400 mt-1">Historical trends and multi-day account analytics</p>
+                    </div>
+                    <div class="flex items-center gap-4 bg-slate-800/50 p-2 rounded-xl border border-slate-700 w-full lg:w-auto">
+                        <span class="text-sm font-bold text-slate-400 ml-2 uppercase">Account:</span>
+                        <select id="details-et-filter" onchange="renderDetails()" class="rounded-lg border-slate-700 p-2 border bg-slate-800 text-white font-bold min-w-[160px] outline-none">
+                            <!-- Populated via JS -->
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Detail Stats Row -->
+                <div id="today-detail-stats" class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                    <!-- Injected stats -->
+                </div>
+
+                <!-- Charts Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
+                        <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-6">Open Rate Trend (%)</h3>
+                        <div class="chart-container"><canvas id="chart-or"></canvas></div>
+                    </div>
+                    <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
+                        <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-6">Delivery Trend (%)</h3>
+                        <div class="chart-container"><canvas id="chart-delivery"></canvas></div>
+                    </div>
+                    <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
+                        <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-6">Mails Down Trend</h3>
+                        <div class="chart-container"><canvas id="chart-mails"></canvas></div>
+                    </div>
+                    <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
+                        <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-6">Overall Perf Score</h3>
+                        <div class="chart-container"><canvas id="chart-overall"></canvas></div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Firebase Configuration and Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Environment variables
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'et-performance-tracker';
+        
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // State Management
+        let appData = [];
+        let charts = {};
+        const ET_LIST = [
+            "JSG30", "JSG38N", "JSG34", "JSG36", "JSG 38", 
+            "JSG 40", "JSG 41", "JSG 43", "JSG 45", "JSG 47", 
+            "JSG 48", "JSG 51", "JSG 52", "JSG 53", "JSG 26", "JSG 34C"
+        ];
+
+        // UI Selectors
+        const preloader = document.getElementById('preloader');
+        const progressText = document.getElementById('progress-text');
+        const loaderFill = document.getElementById('loader-fill');
+        const mainApp = document.getElementById('app');
+        const cardsGrid = document.getElementById('cards-grid');
+
+        // Utils
+        const formatDate = (dateStr) => {
+            const options = { month: 'short', day: 'numeric' };
+            return new Date(dateStr).toLocaleDateString('en-US', options);
+        };
+
+        const getTodayStr = () => new Date().toISOString().split('T')[0];
+
+        // Populate Selects
+        const populateSelects = () => {
+            const formSelect = document.getElementById('form-et-name');
+            const filterSelect = document.getElementById('details-et-filter');
+            ET_LIST.sort().forEach(et => {
+                formSelect.innerHTML += `<option value="${et}">${et}</option>`;
+                filterSelect.innerHTML += `<option value="${et}">${et}</option>`;
+            });
+        };
+
+        // 1. Loading Animation
+        async function runPreloader() {
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.floor(Math.random() * 15) + 5;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        preloader.classList.add('opacity-0');
+                        setTimeout(() => {
+                            preloader.style.visibility = 'hidden';
+                            mainApp.classList.remove('hidden');
+                        }, 500);
+                    }, 500);
+                }
+                progressText.innerText = `INITIALIZING PERFORMANCE TRACKER ${progress}%`;
+                loaderFill.style.width = `${progress}%`;
+            }, 40);
+        }
+
+        // 2. Auth Initialization
+        async function initAuth() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Auth Error:", error);
+            }
+        }
+
+        // 3. Data Fetching
+        async function loadPerformanceData() {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            const perfCollection = collection(db, 'artifacts', appId, 'public', 'data', 'performance');
+            const snapshot = await getDocs(perfCollection);
+            
+            appData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            appData.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            renderDashboard();
+            updateTopET();
+        }
+
+        // 4. Save Logic
+        async function savePerformance(e) {
+            e.preventDefault();
+            const user = auth.currentUser;
+            if (!user) return;
+
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerText = 'SAVING PERFORMANCE...';
+
+            const etName = document.getElementById('form-et-name').value;
+            const date = document.getElementById('form-date').value;
+            const entry = {
+                etName,
+                date,
+                lowestOR: parseFloat(document.getElementById('form-low-or').value),
+                highestOR: parseFloat(document.getElementById('form-high-or').value),
+                lowestDelivery: parseFloat(document.getElementById('form-low-del').value),
+                highestDelivery: parseFloat(document.getElementById('form-high-del').value),
+                mailsDown: parseInt(document.getElementById('form-del-down').value),
+                deliveryRange: document.getElementById('form-del-range').value,
+                orMailsDown: parseInt(document.getElementById('form-or-down').value),
+                threshold: parseFloat(document.getElementById('form-threshold').value),
+                revenue: parseFloat(document.getElementById('form-revenue').value),
+                createdAt: new Date().toISOString()
+            };
+
+            const docId = `${entry.etName}_${entry.date}`;
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'performance', docId);
+            
+            try {
+                await setDoc(docRef, entry);
+                await cleanupOldEntries(etName);
+                await loadPerformanceData();
+                showView('dashboard');
+                document.getElementById('performance-form').reset();
+                document.getElementById('form-date').value = getTodayStr();
+            } catch (err) {
+                console.error("Save Error:", err);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'Save Performance';
+            }
+        }
+
+        async function cleanupOldEntries(etName) {
+            const etEntries = appData.filter(d => d.etName === etName).sort((a,b) => new Date(b.date) - new Date(a.date));
+            if (etEntries.length >= 10) {
+                const toDelete = etEntries.slice(9);
+                for (let item of toDelete) {
+                    const dRef = doc(db, 'artifacts', appId, 'public', 'data', 'performance', item.id);
+                    await deleteDoc(dRef);
+                }
+            }
+        }
+
+        // 5. UI Rendering
+        function renderDashboard() {
+            const today = getTodayStr();
+            cardsGrid.innerHTML = '';
+
+            ET_LIST.sort().forEach(et => {
+                const todayEntry = appData.find(d => d.etName === et && d.date === today);
+                const mostRecent = appData.find(d => d.etName === et);
+                const entry = todayEntry || mostRecent;
+
+                if (!entry) {
+                    cardsGrid.innerHTML += `
+                        <div class="glass-card p-6 rounded-2xl text-center flex flex-col justify-center items-center h-56 group border-dashed border-slate-700">
+                            <div class="text-slate-600 mb-2 group-hover:text-slate-400 transition-colors">NO PERFORMANCE RECORD</div>
+                            <h3 class="text-lg font-bold text-slate-400">${et}</h3>
+                            <button onclick="openFormFor('${et}')" class="mt-4 text-xs font-bold text-indigo-400 hover:text-indigo-300">ADD PERFORMANCE</button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const isToday = entry.date === today;
+                const belowThreshold = entry.lowestOR < entry.threshold || entry.lowestDelivery < entry.threshold;
+                
+                let statusClass = 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20';
+                if (belowThreshold) statusClass = 'text-rose-400 bg-rose-400/10 border-rose-400/20';
+                else if (entry.lowestOR < (entry.threshold + 5)) statusClass = 'text-amber-400 bg-amber-400/10 border-amber-400/20';
+
+                cardsGrid.innerHTML += `
+                    <div class="glass-card p-5 rounded-2xl relative group cursor-pointer" onclick="viewDetailedET('${entry.etName}')">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="text-lg font-bold text-white group-hover:text-indigo-300 transition-colors">${entry.etName}</h3>
+                                <p class="text-[10px] text-slate-500 font-black uppercase tracking-widest">${isToday ? 'LIVE' : formatDate(entry.date)}</p>
+                            </div>
+                            <span class="status-pill border ${statusClass}">
+                                ${belowThreshold ? 'LOW' : 'GOOD'}
+                            </span>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-[9px] text-slate-500 uppercase font-black tracking-widest mb-1">OPEN RATE</p>
+                                <p class="text-sm font-bold ${entry.lowestOR < entry.threshold ? 'text-rose-400' : 'text-slate-200'}">${entry.lowestOR}%</p>
+                            </div>
+                            <div>
+                                <p class="text-[9px] text-slate-500 uppercase font-black tracking-widest mb-1">DELIVERY</p>
+                                <p class="text-sm font-bold ${entry.lowestDelivery < entry.threshold ? 'text-rose-400' : 'text-slate-200'}">${entry.lowestDelivery}%</p>
+                            </div>
+                            <div>
+                                <p class="text-[9px] text-slate-500 uppercase font-black tracking-widest mb-1">MAILS DOWN</p>
+                                <p class="text-sm font-bold text-slate-200">${entry.mailsDown}</p>
+                            </div>
+                            <div>
+                                <p class="text-[9px] text-slate-500 uppercase font-black tracking-widest mb-1">REVENUE</p>
+                                <p class="text-sm font-bold text-emerald-400">$${entry.revenue.toLocaleString()}</p>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 pt-3 border-t border-slate-700/50 flex justify-between items-center opacity-40 group-hover:opacity-100 transition-opacity">
+                            <span class="text-[10px] font-bold text-slate-500">PERF SCORE: ${calculateScore(entry).toFixed(1)}</span>
+                            <span class="text-[10px] font-bold text-indigo-400">TRENDS →</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function calculateScore(e) {
+            const avgOR = (e.lowestOR + e.highestOR) / 2;
+            const avgDel = (e.lowestDelivery + e.highestDelivery) / 2;
+            return (0.4 * avgOR) + (0.4 * avgDel) - (0.2 * e.mailsDown);
+        }
+
+        function updateTopET() {
+            const today = getTodayStr();
+            const todayEntries = appData.filter(d => d.date === today);
+            if (todayEntries.length > 0) {
+                const top = [...todayEntries].sort((a, b) => b.revenue - a.revenue)[0];
+                document.getElementById('top-et-name').innerText = `${top.etName} ($${top.revenue.toLocaleString()})`;
+                document.getElementById('top-revenue-badge').classList.remove('hidden');
+            } else {
+                document.getElementById('top-revenue-badge').classList.add('hidden');
+            }
+        }
+
+        // 6. Analytics Rendering
+        function renderDetails() {
+            const selectedET = document.getElementById('details-et-filter').value;
+            const history = appData.filter(d => d.etName === selectedET).slice(0, 10).reverse();
+            const today = getTodayStr();
+            const todayEntry = history.find(d => d.date === today);
+
+            const statsContainer = document.getElementById('today-detail-stats');
+            if (todayEntry) {
+                statsContainer.innerHTML = `
+                    <div class="bg-indigo-500/10 border border-indigo-500/20 p-4 rounded-xl">
+                        <p class="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-1">Perf Score</p>
+                        <p class="text-2xl font-bold text-white">${calculateScore(todayEntry).toFixed(1)}</p>
+                    </div>
+                    <div class="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-xl">
+                        <p class="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-1">Today Revenue</p>
+                        <p class="text-2xl font-bold text-emerald-400">$${todayEntry.revenue.toLocaleString()}</p>
+                    </div>
+                    <div class="bg-slate-700/30 border border-slate-700 p-4 rounded-xl">
+                        <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Avg Open Rate</p>
+                        <p class="text-xl font-bold text-slate-200">${((todayEntry.lowestOR + todayEntry.highestOR)/2).toFixed(1)}%</p>
+                    </div>
+                    <div class="bg-slate-700/30 border border-slate-700 p-4 rounded-xl">
+                        <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Mails Down</p>
+                        <p class="text-xl font-bold text-slate-200">${todayEntry.mailsDown}</p>
+                    </div>
+                `;
+            } else {
+                statsContainer.innerHTML = `<div class="col-span-4 py-8 text-center text-slate-500 font-bold border border-dashed border-slate-700 rounded-xl uppercase tracking-widest">NO PERFORMANCE DATA FOR TODAY</div>`;
+            }
+
+            const labels = history.map(d => formatDate(d.date));
+            const orData = history.map(d => (d.lowestOR + d.highestOR) / 2);
+            const delData = history.map(d => (d.lowestDelivery + d.highestDelivery) / 2);
+            const mailsData = history.map(d => d.mailsDown);
+            const scoreData = history.map(d => calculateScore(d));
+
+            const chartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { 
+                        beginAtZero: false, 
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        ticks: { color: '#64748b', font: { weight: 'bold', size: 10 } }
+                    },
+                    x: { 
+                        grid: { display: false },
+                        ticks: { color: '#64748b', font: { weight: 'bold', size: 10 } }
+                    }
+                }
+            };
+
+            const updateChart = (id, label, data, color) => {
+                if (charts[id]) charts[id].destroy();
+                const ctx = document.getElementById(id).getContext('2d');
+                charts[id] = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels,
+                        datasets: [{
+                            label,
+                            data,
+                            borderColor: color,
+                            backgroundColor: color + '15',
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 5,
+                            pointHoverRadius: 8,
+                            pointBackgroundColor: color,
+                            pointBorderColor: '#0f172a',
+                            pointBorderWidth: 2
+                        }]
+                    },
+                    options: chartOptions
+                });
+            };
+
+            updateChart('chart-or', 'OR %', orData, '#6366f1');
+            updateChart('chart-delivery', 'Del %', delData, '#22c55e');
+            updateChart('chart-mails', 'Mails', mailsData, '#f59e0b');
+            updateChart('chart-overall', 'Score', scoreData, '#ec4899');
+        }
+
+        // Navigation
+        window.showView = function(viewName) {
+            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(`view-${viewName}`).classList.remove('hidden');
+            
+            const title = document.getElementById('page-title');
+            if (viewName === 'dashboard') title.innerText = "Today's Performance Overview";
+            if (viewName === 'form') title.innerText = "Performance Update";
+            if (viewName === 'details') {
+                title.innerText = "Performance Trends & Analytics";
+                renderDetails();
+            }
+            window.scrollTo(0,0);
+        };
+
+        window.openFormFor = function(et) {
+            document.getElementById('form-et-name').value = et;
+            document.getElementById('form-date').value = getTodayStr();
+            showView('form');
+        };
+
+        window.viewDetailedET = function(et) {
+            document.getElementById('details-et-filter').value = et;
+            showView('details');
+        };
+
+        document.getElementById('performance-form').addEventListener('submit', savePerformance);
+
+        window.onload = async () => {
+            populateSelects();
+            runPreloader();
+            await initAuth();
+            document.getElementById('form-date').value = getTodayStr();
+            
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    loadPerformanceData();
+                    setInterval(loadPerformanceData, 60000); // Sync every minute
+                }
+            });
+        };
+    </script>
+</body>
+</html>

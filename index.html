@@ -43,7 +43,7 @@
         }
 
         .preloader-logo {
-            width: 200px; /* Large Logo */
+            width: 200px;
             margin-bottom: 32px;
             filter: drop-shadow(0 0 15px rgba(99, 102, 241, 0.4));
         }
@@ -235,8 +235,9 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
 
-        // --- PRELOADER START (Run immediately to prevent 0% stick) ---
+        // --- PRELOADER START ---
         const preloader = document.getElementById('preloader');
         const progressText = document.getElementById('progress-text');
         const loaderFill = document.getElementById('loader-fill');
@@ -263,29 +264,30 @@
         }
         startPreloader();
 
-        // --- FIREBASE SETUP ---
-        let firebaseConfig = {};
-        try {
-            // Check if environment variables exist, otherwise fallback to empty to prevent crash
-            firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-                apiKey: "", authDomain: "", projectId: "", storageBucket: "", messagingSenderId: "", appId: ""
-            };
-        } catch (e) {
-            console.warn("Firebase config missing or invalid.");
-        }
+        // --- FIREBASE CONFIGURATION (Your Project Keys) ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyBhW8h3qZaav9NCLMKlJxLMxfX7mkUZqaQ",
+            authDomain: "mmperform-6c550.firebaseapp.com",
+            projectId: "mmperform-6c550",
+            storageBucket: "mmperform-6c550.firebasestorage.app",
+            messagingSenderId: "76075681940",
+            appId: "1:76075681940:web:afad788dc3f87843330c81",
+            measurementId: "G-PD286TETH3"
+        };
 
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'et-performance-tracker';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'mm-performance-tracker';
         const ET_LIST = ["JSG30", "JSG38N", "JSG34", "JSG36", "JSG 38", "JSG 40", "JSG 41", "JSG 43", "JSG 45", "JSG 47", "JSG 48", "JSG 51", "JSG 52", "JSG 53", "JSG 26", "JSG 34C"].sort();
 
         let appData = [];
         let charts = {};
-        let auth, db;
+        let auth, db, analytics;
 
-        // Initialize Firebase safely
+        // Initialize Firebase
         try {
             const firebaseApp = initializeApp(firebaseConfig);
             auth = getAuth(firebaseApp);
             db = getFirestore(firebaseApp);
+            analytics = getAnalytics(firebaseApp);
         } catch (e) {
             console.error("Firebase Initialization Failed:", e);
         }
@@ -308,6 +310,7 @@
         async function loadData() {
             if (!auth.currentUser || !db) return;
             try {
+                // Rule 1: Using strict path for Firestore artifacts
                 const snap = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'performance'));
                 appData = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 appData.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -405,10 +408,12 @@
                 createdAt: new Date().toISOString()
             };
             try {
+                // Rule 1: Using strict path for Firestore artifacts
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'performance', `${entry.etName}_${entry.date}`), entry);
                 await loadData();
                 showView('dashboard');
                 e.target.reset();
+                document.getElementById('form-date').value = getTodayStr();
             } catch (err) { console.error(err); }
             finally { btn.disabled = false; btn.innerText = 'Save Performance'; }
         });
@@ -448,6 +453,7 @@
         window.addEventListener('load', async () => {
             populateSelects();
             if (auth) {
+                // Auth Priority Rule 3: Authenticate BEFORE queries
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) await signInWithCustomToken(auth, __initial_auth_token);
                 else await signInAnonymously(auth);
                 onAuthStateChanged(auth, (user) => { if (user) loadData(); });

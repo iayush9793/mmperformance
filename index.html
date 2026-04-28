@@ -114,6 +114,20 @@
         .back-btn:hover {
             color: white;
         }
+
+        .date-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .date-input-group label {
+            font-size: 10px;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
     </style>
 </head>
 <body>
@@ -121,7 +135,7 @@
     <!-- Preloader -->
     <div id="preloader">
         <img src="https://image.s7.sfmc-content.com/lib/fe3e11717d64057d751472/m/1/2ddd9d88-4661-43a5-bf8f-809065b48367.png" alt="Logo" class="preloader-logo">
-        <div id="progress-text" class="text-xs font-bold text-slate-400 mb-2 tracking-[0.2em]">LOADING PERFORMANCE PERFORMANCE 0%</div>
+        <div id="progress-text" class="text-xs font-bold text-slate-400 mb-2 tracking-[0.2em]">LOADING PERFORMANCE 0%</div>
         <div class="loader-bar-container">
             <div id="loader-fill" class="loader-bar-fill"></div>
         </div>
@@ -136,9 +150,10 @@
                     <span class="font-bold text-white hidden md:block tracking-tight text-2xl">Performance Tracker</span>
                 </div>
                 
-                <h1 id="page-title" class="text-lg font-semibold text-slate-200 absolute left-1/2 -translate-x-1/2 hidden xl:block">
-                    Today's Performance Overview
-                </h1>
+                <div class="hidden xl:flex flex-col items-center gap-1 absolute left-1/2 -translate-x-1/2">
+                   <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Dashboard Date</span>
+                   <input type="date" id="dashboard-date-picker" onchange="renderDashboard()" class="bg-transparent border-none text-white font-bold text-lg p-0 cursor-pointer outline-none">
+                </div>
 
                 <div class="flex items-center gap-4">
                     <div id="top-revenue-badge" class="hidden lg:flex items-center bg-emerald-500/10 text-emerald-400 px-3 py-1.5 rounded-full text-xs font-bold border border-emerald-500/20">
@@ -205,7 +220,7 @@
                         </div>
                         <input type="text" id="form-del-range" placeholder="Delivery Range (e.g. 90-100%)" class="w-full rounded-lg p-2.5 border outline-none">
                         <div class="pt-6 flex gap-3">
-                            <button type="submit" id="submit-btn" class="w-full py-3 bg-indigo-600 text-white rounded-lg font-bold">Save Performance</button>
+                            <button type="submit" id="submit-btn" class="w-full py-3 bg-indigo-600 text-white rounded-lg font-bold transition-all hover:bg-indigo-500">Save Performance</button>
                         </div>
                     </form>
                 </div>
@@ -219,14 +234,30 @@
                         Back to Dashboard
                     </button>
                 </div>
-                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-6">
-                    <div>
+                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-8 gap-6">
+                    <div class="space-y-1">
                         <h2 class="text-3xl font-bold text-white">Performance Analytics</h2>
-                        <p class="text-slate-400 mt-1">Multi-day performance trend tracking</p>
+                        <p class="text-slate-400">Custom range performance trend tracking</p>
                     </div>
-                    <select id="details-et-filter" onchange="renderDetails()" class="rounded-lg border-slate-700 p-2 border bg-slate-800 text-white font-bold outline-none"></select>
+                    
+                    <div class="flex flex-wrap items-end gap-4 bg-slate-800/40 p-4 rounded-2xl border border-slate-700/50 w-full lg:w-auto">
+                        <div class="date-input-group">
+                            <label>Account</label>
+                            <select id="details-et-filter" onchange="renderDetails()" class="rounded-lg border-slate-700 px-3 py-2 bg-slate-800 text-white font-bold outline-none min-w-[140px]"></select>
+                        </div>
+                        <div class="date-input-group">
+                            <label>Start Date</label>
+                            <input type="date" id="details-start-date" onchange="renderDetails()" class="rounded-lg px-3 py-2 outline-none">
+                        </div>
+                        <div class="date-input-group">
+                            <label>End Date</label>
+                            <input type="date" id="details-end-date" onchange="renderDetails()" class="rounded-lg px-3 py-2 outline-none">
+                        </div>
+                    </div>
                 </div>
+
                 <div id="today-detail-stats" class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8"></div>
+                
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
                         <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-6">Open Rate Trend (%)</h3>
@@ -241,7 +272,7 @@
                         <div class="chart-container"><canvas id="chart-mails"></canvas></div>
                     </div>
                     <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
-                        <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-6">Performance Index</h3>
+                        <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-6">Revenue Trend ($)</h3>
                         <div class="chart-container"><canvas id="chart-overall"></canvas></div>
                     </div>
                 </div>
@@ -258,6 +289,9 @@
         const progressText = document.getElementById('progress-text');
         const loaderFill = document.getElementById('loader-fill');
         const mainApp = document.getElementById('app');
+
+        const getTodayStr = () => new Date().toISOString().split('T')[0];
+        const formatDate = (d) => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
         function startPreloader() {
             let progress = 0;
@@ -303,9 +337,6 @@
             db = getFirestore(firebaseApp);
         } catch (e) { console.error(e); }
 
-        const getTodayStr = () => new Date().toISOString().split('T')[0];
-        const formatDate = (d) => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-
         const populateSelects = () => {
             const f = document.getElementById('form-et-name');
             const d = document.getElementById('details-et-filter');
@@ -328,12 +359,11 @@
 
         function renderDashboard() {
             const grid = document.getElementById('cards-grid');
-            const today = getTodayStr();
+            const selectedDate = document.getElementById('dashboard-date-picker').value;
             grid.innerHTML = '';
 
             ET_LIST.forEach(et => {
-                const todayEntry = appData.find(d => d.etName === et && d.date === today);
-                const entry = todayEntry || appData.find(d => d.etName === et);
+                const entry = appData.find(d => d.etName === et && d.date === selectedDate);
 
                 if (!entry) {
                     grid.innerHTML += `
@@ -345,7 +375,7 @@
                     return;
                 }
 
-                const isToday = entry.date === today;
+                const isToday = entry.date === getTodayStr();
                 const lowOR = entry.lowestOR < entry.threshold;
                 const lowDel = entry.lowestDelivery < entry.threshold;
 
@@ -380,12 +410,14 @@
         }
 
         function updateTopET() {
-            const today = getTodayStr();
-            const todayEntries = appData.filter(d => d.date === today);
-            if (todayEntries.length > 0) {
-                const top = [...todayEntries].sort((a, b) => b.revenue - a.revenue)[0];
+            const selectedDate = document.getElementById('dashboard-date-picker').value;
+            const entries = appData.filter(d => d.date === selectedDate);
+            if (entries.length > 0) {
+                const top = [...entries].sort((a, b) => b.revenue - a.revenue)[0];
                 document.getElementById('top-et-name').innerText = `${top.etName} ($${top.revenue.toLocaleString()})`;
                 document.getElementById('top-revenue-badge').classList.remove('hidden');
+            } else {
+                document.getElementById('top-revenue-badge').classList.add('hidden');
             }
         }
 
@@ -411,9 +443,9 @@
             e.preventDefault();
             const btn = document.getElementById('submit-btn');
             btn.disabled = true; btn.innerText = 'SAVING...';
-            const etName = document.getElementById('form-et-name').value;
             const entry = {
-                etName, date: document.getElementById('form-date').value,
+                etName: document.getElementById('form-et-name').value, 
+                date: document.getElementById('form-date').value,
                 lowestOR: parseFloat(document.getElementById('form-low-or').value),
                 highestOR: parseFloat(document.getElementById('form-high-or').value),
                 lowestDelivery: parseFloat(document.getElementById('form-low-del').value),
@@ -436,17 +468,29 @@
 
         function renderDetails() {
             const et = document.getElementById('details-et-filter').value;
-            const history = appData.filter(d => d.etName === et).slice(0, 10).reverse();
-            const today = history.find(d => d.date === getTodayStr());
-            const stats = document.getElementById('today-detail-stats');
+            const start = document.getElementById('details-start-date').value;
+            const end = document.getElementById('details-end-date').value;
             
-            if (today) {
+            // Filter by ET and custom date range
+            let history = appData.filter(d => d.etName === et);
+            if (start) history = history.filter(d => d.date >= start);
+            if (end) history = history.filter(d => d.date <= end);
+            
+            // Sort Chronologically for chart
+            history.sort((a,b) => new Date(a.date) - new Date(b.date));
+
+            const stats = document.getElementById('today-detail-stats');
+            const summaryEntry = history[history.length - 1]; // Use last entry of selected range as summary
+            
+            if (summaryEntry) {
                 stats.innerHTML = `
-                    <div class="bg-indigo-500/10 border border-indigo-500/20 p-4 rounded-xl"><p class="text-[10px] text-indigo-400 uppercase font-black">Today Revenue</p><p class="text-2xl font-bold text-emerald-400">$${today.revenue}</p></div>
-                    <div class="bg-slate-700/30 p-4 rounded-xl"><p class="text-[10px] text-slate-500 uppercase font-black">OR Range</p><p class="text-lg font-bold">${today.lowestOR}% - ${today.highestOR}%</p></div>
-                    <div class="bg-slate-700/30 p-4 rounded-xl"><p class="text-[10px] text-slate-500 uppercase font-black">Del Range</p><p class="text-lg font-bold">${today.lowestDelivery}% - ${today.highestDelivery}%</p></div>
-                    <div class="bg-slate-700/30 p-4 rounded-xl"><p class="text-[10px] text-slate-500 uppercase font-black">OR Mails Down</p><p class="text-xl font-bold">${today.orMailsDown || 0}</p></div>`;
-            } else { stats.innerHTML = `<div class="col-span-4 py-8 text-center text-slate-500 font-bold border border-dashed border-slate-700 rounded-xl">NO PERFORMANCE DATA TODAY</div>`; }
+                    <div class="bg-indigo-500/10 border border-indigo-500/20 p-4 rounded-xl"><p class="text-[10px] text-indigo-400 uppercase font-black tracking-widest">Revenue (Last Entry)</p><p class="text-2xl font-bold text-emerald-400">$${summaryEntry.revenue}</p></div>
+                    <div class="bg-slate-700/30 p-4 rounded-xl"><p class="text-[10px] text-slate-500 uppercase font-black tracking-widest">Avg OR (Period)</p><p class="text-lg font-bold">${summaryEntry.lowestOR}% - ${summaryEntry.highestOR}%</p></div>
+                    <div class="bg-slate-700/30 p-4 rounded-xl"><p class="text-[10px] text-slate-500 uppercase font-black tracking-widest">Avg Del (Period)</p><p class="text-lg font-bold">${summaryEntry.lowestDelivery}% - ${summaryEntry.highestDelivery}%</p></div>
+                    <div class="bg-slate-700/30 p-4 rounded-xl"><p class="text-[10px] text-slate-500 uppercase font-black tracking-widest">OR Mails Down</p><p class="text-xl font-bold">${summaryEntry.orMailsDown || 0}</p></div>`;
+            } else { 
+                stats.innerHTML = `<div class="col-span-4 py-8 text-center text-slate-500 font-bold border border-dashed border-slate-700 rounded-xl tracking-widest">NO DATA FOR THIS RANGE</div>`; 
+            }
 
             const labels = history.map(d => formatDate(d.date));
             const datasets = [
@@ -467,6 +511,16 @@
         }
 
         window.addEventListener('load', async () => {
+            const today = getTodayStr();
+            document.getElementById('dashboard-date-picker').value = today;
+            document.getElementById('form-date').value = today;
+            
+            // Set default range for analytics (last 7 days)
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+            document.getElementById('details-start-date').value = sevenDaysAgo.toISOString().split('T')[0];
+            document.getElementById('details-end-date').value = today;
+
             populateSelects();
             if (auth) {
                 await signInAnonymously(auth);

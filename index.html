@@ -94,7 +94,7 @@
             width: 100%;
         }
 
-        input, select {
+        input, select, textarea {
             background-color: #1e293b !important;
             border: 1px solid #334155 !important;
             color: white !important;
@@ -127,6 +127,23 @@
             color: #64748b;
             text-transform: uppercase;
             letter-spacing: 0.05em;
+        }
+
+        .edit-link {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 4px 8px;
+            border-radius: 6px;
+            background: rgba(99, 102, 241, 0.1);
+            transition: all 0.2s;
+        }
+
+        .edit-link:hover {
+            background: rgba(99, 102, 241, 0.2);
+            color: white;
         }
     </style>
 </head>
@@ -203,22 +220,41 @@
                             </div>
                         </div>
                         <div class="grid grid-cols-2 gap-4">
-                            <input type="number" step="0.01" id="form-low-or" placeholder="Lowest OR %" required class="rounded-lg p-2.5 border">
-                            <input type="number" step="0.01" id="form-high-or" placeholder="Highest OR %" required class="rounded-lg p-2.5 border">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 ml-1">Open Rate Range</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <input type="number" step="0.01" id="form-low-or" placeholder="Low %" required class="rounded-lg p-2.5 border">
+                                    <input type="number" step="0.01" id="form-high-or" placeholder="High %" required class="rounded-lg p-2.5 border">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 ml-1">Delivery Range</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <input type="number" step="0.01" id="form-low-del" placeholder="Low %" required class="rounded-lg p-2.5 border">
+                                    <input type="number" step="0.01" id="form-high-del" placeholder="High %" required class="rounded-lg p-2.5 border">
+                                </div>
+                            </div>
                         </div>
                         <div class="grid grid-cols-2 gap-4">
-                            <input type="number" step="0.01" id="form-low-del" placeholder="Lowest Del %" required class="rounded-lg p-2.5 border">
-                            <input type="number" step="0.01" id="form-high-del" placeholder="Highest Del %" required class="rounded-lg p-2.5 border">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 ml-1">Mails Down</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <input type="number" id="form-del-down" placeholder="Del Down" required class="rounded-lg p-2.5 border">
+                                    <input type="number" id="form-or-down" placeholder="OR Down" required class="rounded-lg p-2.5 border">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 ml-1">Revenue & Threshold</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <input type="number" step="0.01" id="form-revenue" placeholder="Revenue $" class="rounded-lg p-2.5 border font-bold text-emerald-400">
+                                    <input type="number" step="0.1" id="form-threshold" placeholder="Threshold %" value="85" required class="rounded-lg p-2.5 border">
+                                </div>
+                            </div>
                         </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <input type="number" id="form-del-down" placeholder="Del Mails Down" required class="rounded-lg p-2.5 border">
-                            <input type="number" id="form-or-down" placeholder="OR Mails Down" required class="rounded-lg p-2.5 border">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Notes</label>
+                            <textarea id="form-notes" rows="3" placeholder="Add performance notes here..." class="w-full rounded-lg p-2.5 border outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
                         </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <input type="number" step="0.01" id="form-revenue" placeholder="Revenue $" required class="rounded-lg p-2.5 border font-bold text-emerald-400">
-                            <input type="number" step="0.1" id="form-threshold" placeholder="Threshold %" value="85" required class="rounded-lg p-2.5 border">
-                        </div>
-                        <input type="text" id="form-del-range" placeholder="Delivery Range (e.g. 90-100%)" class="w-full rounded-lg p-2.5 border outline-none">
                         <div class="pt-6 flex gap-3">
                             <button type="submit" id="submit-btn" class="w-full py-3 bg-indigo-600 text-white rounded-lg font-bold transition-all hover:bg-indigo-500">Save Performance</button>
                         </div>
@@ -378,16 +414,18 @@
                 const isToday = entry.date === getTodayStr();
                 const lowOR = entry.lowestOR < entry.threshold;
                 const lowDel = entry.lowestDelivery < entry.threshold;
+                const revStr = entry.revenue !== undefined ? `$${entry.revenue.toLocaleString()}` : '-';
 
                 grid.innerHTML += `
-                    <div class="glass-card p-6 rounded-[24px] group cursor-pointer" onclick="viewDetailedET('${entry.etName}')">
+                    <div class="glass-card p-6 rounded-[24px] group">
                         <div class="flex justify-between items-start mb-6">
                             <div>
-                                <h3 class="text-2xl font-bold text-white group-hover:text-indigo-300 transition-colors">${entry.etName}</h3>
+                                <h3 class="text-2xl font-bold text-white">${entry.etName}</h3>
                                 <p class="text-[11px] text-slate-500 font-black uppercase tracking-wider mt-1">${isToday ? 'LIVE' : formatDate(entry.date)}</p>
                             </div>
+                            <button onclick="editPerformance('${entry.id}')" class="edit-link">Edit</button>
                         </div>
-                        <div class="grid grid-cols-2 gap-y-6 gap-x-4">
+                        <div class="grid grid-cols-2 gap-y-6 gap-x-4 mb-6">
                             <div>
                                 <p class="text-[10px] text-slate-500 font-black uppercase mb-1.5 tracking-widest">OR %</p>
                                 <p class="text-base font-bold ${lowOR ? 'text-rose-400' : 'text-slate-200'}">${entry.lowestOR}% - ${entry.highestOR}%</p>
@@ -402,8 +440,12 @@
                             </div>
                             <div>
                                 <p class="text-[10px] text-slate-500 font-black uppercase mb-1.5 tracking-widest">REVENUE</p>
-                                <p class="text-base font-bold text-emerald-400">$${entry.revenue.toLocaleString()}</p>
+                                <p class="text-base font-bold text-emerald-400">${revStr}</p>
                             </div>
+                        </div>
+                        <div class="pt-4 border-t border-slate-700/50">
+                            <p class="text-[10px] text-slate-500 font-black uppercase mb-1.5 tracking-widest">NOTES</p>
+                            <p class="text-sm text-slate-300 leading-relaxed italic">${entry.notes || 'No notes available'}</p>
                         </div>
                     </div>`;
             });
@@ -411,15 +453,34 @@
 
         function updateTopET() {
             const selectedDate = document.getElementById('dashboard-date-picker').value;
-            const entries = appData.filter(d => d.date === selectedDate);
+            const entries = appData.filter(d => d.date === selectedDate && d.revenue !== undefined);
             if (entries.length > 0) {
-                const top = [...entries].sort((a, b) => b.revenue - a.revenue)[0];
+                const top = [...entries].sort((a, b) => (b.revenue || 0) - (a.revenue || 0))[0];
                 document.getElementById('top-et-name').innerText = `${top.etName} ($${top.revenue.toLocaleString()})`;
                 document.getElementById('top-revenue-badge').classList.remove('hidden');
             } else {
                 document.getElementById('top-revenue-badge').classList.add('hidden');
             }
         }
+
+        window.editPerformance = (id) => {
+            const entry = appData.find(d => d.id === id);
+            if (!entry) return;
+            
+            document.getElementById('form-et-name').value = entry.etName;
+            document.getElementById('form-date').value = entry.date;
+            document.getElementById('form-low-or').value = entry.lowestOR;
+            document.getElementById('form-high-or').value = entry.highestOR;
+            document.getElementById('form-low-del').value = entry.lowestDelivery;
+            document.getElementById('form-high-del').value = entry.highestDelivery;
+            document.getElementById('form-del-down').value = entry.mailsDown;
+            document.getElementById('form-or-down').value = entry.orMailsDown;
+            document.getElementById('form-revenue').value = entry.revenue || '';
+            document.getElementById('form-threshold').value = entry.threshold;
+            document.getElementById('form-notes').value = entry.notes || '';
+            
+            showView('form');
+        };
 
         window.showView = (view) => {
             document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
@@ -429,6 +490,7 @@
         };
 
         window.openFormFor = (et) => {
+            document.getElementById('performance-form').reset();
             document.getElementById('form-et-name').value = et;
             document.getElementById('form-date').value = getTodayStr();
             showView('form');
@@ -443,6 +505,8 @@
             e.preventDefault();
             const btn = document.getElementById('submit-btn');
             btn.disabled = true; btn.innerText = 'SAVING...';
+            
+            const revenueVal = document.getElementById('form-revenue').value;
             const entry = {
                 etName: document.getElementById('form-et-name').value, 
                 date: document.getElementById('form-date').value,
@@ -452,9 +516,9 @@
                 highestDelivery: parseFloat(document.getElementById('form-high-del').value),
                 mailsDown: parseInt(document.getElementById('form-del-down').value),
                 orMailsDown: parseInt(document.getElementById('form-or-down').value),
-                revenue: parseFloat(document.getElementById('form-revenue').value),
+                revenue: revenueVal !== '' ? parseFloat(revenueVal) : undefined,
                 threshold: parseFloat(document.getElementById('form-threshold').value),
-                deliveryRange: document.getElementById('form-del-range').value,
+                notes: document.getElementById('form-notes').value,
                 createdAt: new Date().toISOString()
             };
             try {
@@ -471,20 +535,19 @@
             const start = document.getElementById('details-start-date').value;
             const end = document.getElementById('details-end-date').value;
             
-            // Filter by ET and custom date range
             let history = appData.filter(d => d.etName === et);
             if (start) history = history.filter(d => d.date >= start);
             if (end) history = history.filter(d => d.date <= end);
             
-            // Sort Chronologically for chart
             history.sort((a,b) => new Date(a.date) - new Date(b.date));
 
             const stats = document.getElementById('today-detail-stats');
-            const summaryEntry = history[history.length - 1]; // Use last entry of selected range as summary
+            const summaryEntry = history[history.length - 1];
             
             if (summaryEntry) {
+                const rev = summaryEntry.revenue !== undefined ? `$${summaryEntry.revenue}` : '-';
                 stats.innerHTML = `
-                    <div class="bg-indigo-500/10 border border-indigo-500/20 p-4 rounded-xl"><p class="text-[10px] text-indigo-400 uppercase font-black tracking-widest">Revenue (Last Entry)</p><p class="text-2xl font-bold text-emerald-400">$${summaryEntry.revenue}</p></div>
+                    <div class="bg-indigo-500/10 border border-indigo-500/20 p-4 rounded-xl"><p class="text-[10px] text-indigo-400 uppercase font-black tracking-widest">Revenue (Last Entry)</p><p class="text-2xl font-bold text-emerald-400">${rev}</p></div>
                     <div class="bg-slate-700/30 p-4 rounded-xl"><p class="text-[10px] text-slate-500 uppercase font-black tracking-widest">Avg OR (Period)</p><p class="text-lg font-bold">${summaryEntry.lowestOR}% - ${summaryEntry.highestOR}%</p></div>
                     <div class="bg-slate-700/30 p-4 rounded-xl"><p class="text-[10px] text-slate-500 uppercase font-black tracking-widest">Avg Del (Period)</p><p class="text-lg font-bold">${summaryEntry.lowestDelivery}% - ${summaryEntry.highestDelivery}%</p></div>
                     <div class="bg-slate-700/30 p-4 rounded-xl"><p class="text-[10px] text-slate-500 uppercase font-black tracking-widest">OR Mails Down</p><p class="text-xl font-bold">${summaryEntry.orMailsDown || 0}</p></div>`;
@@ -497,7 +560,7 @@
                 { id: 'chart-or', label: 'OR Range Avg', data: history.map(d => (d.lowestOR + d.highestOR)/2), color: '#6366f1' },
                 { id: 'chart-delivery', label: 'Del Range Avg', data: history.map(d => (d.lowestDelivery + d.highestDelivery)/2), color: '#22c55e' },
                 { id: 'chart-mails', label: 'OR Mails Down', data: history.map(d => d.orMailsDown || 0), color: '#f59e0b' },
-                { id: 'chart-overall', label: 'Revenue Trend', data: history.map(d => d.revenue), color: '#ec4899' }
+                { id: 'chart-overall', label: 'Revenue Trend', data: history.map(d => d.revenue || 0), color: '#ec4899' }
             ];
 
             datasets.forEach(ds => {
@@ -515,7 +578,6 @@
             document.getElementById('dashboard-date-picker').value = today;
             document.getElementById('form-date').value = today;
             
-            // Set default range for analytics (last 7 days)
             const sevenDaysAgo = new Date();
             sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
             document.getElementById('details-start-date').value = sevenDaysAgo.toISOString().split('T')[0];

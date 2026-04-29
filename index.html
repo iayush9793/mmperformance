@@ -388,8 +388,16 @@
                 const snap = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'performance'));
                 appData = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 appData.sort((a, b) => new Date(b.date) - new Date(a.date));
+                
+                // Refresh visible dashboard
                 renderDashboard();
                 updateTopET();
+                
+                // If currently on details view, refresh charts automatically
+                const detailsView = document.getElementById('view-details');
+                if (!detailsView.classList.contains('hidden')) {
+                    renderDetails();
+                }
             } catch (e) { console.error(e); }
         }
 
@@ -530,48 +538,87 @@
             finally { btn.disabled = false; btn.innerText = 'Save Performance'; }
         });
 
-        function renderDetails() {
+        window.renderDetails = function() {
             const et = document.getElementById('details-et-filter').value;
             const start = document.getElementById('details-start-date').value;
             const end = document.getElementById('details-end-date').value;
             
+            // Filter by selected ET and the chosen custom date range
             let history = appData.filter(d => d.etName === et);
             if (start) history = history.filter(d => d.date >= start);
             if (end) history = history.filter(d => d.date <= end);
             
+            // Ensure the data is sorted chronologically for the line charts
             history.sort((a,b) => new Date(a.date) - new Date(b.date));
 
             const stats = document.getElementById('today-detail-stats');
-            const summaryEntry = history[history.length - 1];
+            const summaryEntry = history[history.length - 1]; // Use latest entry in range for the info boxes
             
             if (summaryEntry) {
-                const rev = summaryEntry.revenue !== undefined ? `$${summaryEntry.revenue}` : '-';
+                const rev = summaryEntry.revenue !== undefined ? `$${summaryEntry.revenue.toLocaleString()}` : '-';
                 stats.innerHTML = `
-                    <div class="bg-indigo-500/10 border border-indigo-500/20 p-4 rounded-xl"><p class="text-[10px] text-indigo-400 uppercase font-black tracking-widest">Revenue (Last Entry)</p><p class="text-2xl font-bold text-emerald-400">${rev}</p></div>
-                    <div class="bg-slate-700/30 p-4 rounded-xl"><p class="text-[10px] text-slate-500 uppercase font-black tracking-widest">Avg OR (Period)</p><p class="text-lg font-bold">${summaryEntry.lowestOR}% - ${summaryEntry.highestOR}%</p></div>
-                    <div class="bg-slate-700/30 p-4 rounded-xl"><p class="text-[10px] text-slate-500 uppercase font-black tracking-widest">Avg Del (Period)</p><p class="text-lg font-bold">${summaryEntry.lowestDelivery}% - ${summaryEntry.highestDelivery}%</p></div>
-                    <div class="bg-slate-700/30 p-4 rounded-xl"><p class="text-[10px] text-slate-500 uppercase font-black tracking-widest">OR Mails Down</p><p class="text-xl font-bold">${summaryEntry.orMailsDown || 0}</p></div>`;
+                    <div class="bg-indigo-500/10 border border-indigo-500/20 p-4 rounded-xl">
+                        <p class="text-[10px] text-indigo-400 uppercase font-black tracking-widest">Revenue (Last Entry)</p>
+                        <p class="text-2xl font-bold text-emerald-400">${rev}</p>
+                    </div>
+                    <div class="bg-slate-700/30 p-4 rounded-xl">
+                        <p class="text-[10px] text-slate-500 uppercase font-black tracking-widest">Avg OR (Period)</p>
+                        <p class="text-lg font-bold">${summaryEntry.lowestOR}% - ${summaryEntry.highestOR}%</p>
+                    </div>
+                    <div class="bg-slate-700/30 p-4 rounded-xl">
+                        <p class="text-[10px] text-slate-500 uppercase font-black tracking-widest">Avg Del (Period)</p>
+                        <p class="text-lg font-bold">${summaryEntry.lowestDelivery}% - ${summaryEntry.highestDelivery}%</p>
+                    </div>
+                    <div class="bg-slate-700/30 p-4 rounded-xl">
+                        <p class="text-[10px] text-slate-500 uppercase font-black tracking-widest">OR Mails Down</p>
+                        <p class="text-xl font-bold">${summaryEntry.orMailsDown || 0}</p>
+                    </div>`;
             } else { 
-                stats.innerHTML = `<div class="col-span-4 py-8 text-center text-slate-500 font-bold border border-dashed border-slate-700 rounded-xl tracking-widest">NO DATA FOR THIS RANGE</div>`; 
+                stats.innerHTML = `<div class="col-span-4 py-8 text-center text-slate-500 font-bold border border-dashed border-slate-700 rounded-xl tracking-widest">NO DATA FOR THIS ACCOUNT/RANGE</div>`; 
             }
 
             const labels = history.map(d => formatDate(d.date));
             const datasets = [
-                { id: 'chart-or', label: 'OR Range Avg', data: history.map(d => (d.lowestOR + d.highestOR)/2), color: '#6366f1' },
-                { id: 'chart-delivery', label: 'Del Range Avg', data: history.map(d => (d.lowestDelivery + d.highestDelivery)/2), color: '#22c55e' },
+                { id: 'chart-or', label: 'Avg Open Rate (%)', data: history.map(d => (d.lowestOR + d.highestOR)/2), color: '#6366f1' },
+                { id: 'chart-delivery', label: 'Avg Delivery (%)', data: history.map(d => (d.lowestDelivery + d.highestDelivery)/2), color: '#22c55e' },
                 { id: 'chart-mails', label: 'OR Mails Down', data: history.map(d => d.orMailsDown || 0), color: '#f59e0b' },
-                { id: 'chart-overall', label: 'Revenue Trend', data: history.map(d => d.revenue || 0), color: '#ec4899' }
+                { id: 'chart-overall', label: 'Revenue trend ($)', data: history.map(d => d.revenue || 0), color: '#ec4899' }
             ];
 
             datasets.forEach(ds => {
+                const canvas = document.getElementById(ds.id);
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                
+                // Destroy existing chart instance to prevent overlaps on refresh
                 if (charts[ds.id]) charts[ds.id].destroy();
-                charts[ds.id] = new Chart(document.getElementById(ds.id).getContext('2d'), {
+                
+                charts[ds.id] = new Chart(ctx, {
                     type: 'line',
-                    data: { labels, datasets: [{ data: ds.data, borderColor: ds.color, backgroundColor: ds.color+'15', fill: true, tension: 0.4 }] },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } } }
+                    data: { 
+                        labels, 
+                        datasets: [{ 
+                            data: ds.data, 
+                            borderColor: ds.color, 
+                            backgroundColor: ds.color+'15', 
+                            fill: true, 
+                            tension: 0.4,
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        }] 
+                    },
+                    options: { 
+                        responsive: true, 
+                        maintainAspectRatio: false, 
+                        plugins: { legend: { display: false } }, 
+                        scales: { 
+                            y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } }, 
+                            x: { grid: { display: false }, ticks: { color: '#94a3b8' } } 
+                        } 
+                    }
                 });
             });
-        }
+        };
 
         window.addEventListener('load', async () => {
             const today = getTodayStr();

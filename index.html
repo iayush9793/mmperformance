@@ -7,18 +7,37 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
         
         :root {
+            /* Default Dark Theme Variables */
             --bg-color: #0f172a;
-            --card-bg: #1e293b;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --header-bg: rgba(15, 23, 42, 0.8);
             --primary: #6366f1;
             --success: #22c55e;
             --warning: #f59e0b;
             --danger: #ef4444;
-            --border: #334155;
+            --border: rgba(255, 255, 255, 0.05);
             --text-main: #f1f5f9;
             --text-muted: #94a3b8;
+            --input-bg: #1e293b;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            --lamp-glow: rgba(251, 191, 36, 0.15);
+            --fixture-color: #475569;
+        }
+
+        body.light-mode {
+            --bg-color: #f8fafc;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --header-bg: rgba(255, 255, 255, 0.8);
+            --border: rgba(99, 102, 241, 0.1);
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --input-bg: #ffffff;
+            --shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.08), 0 8px 10px -6px rgba(99, 102, 241, 0.08);
+            --lamp-glow: transparent;
+            --fixture-color: #94a3b8;
         }
 
         body {
@@ -29,7 +48,23 @@
             overflow-x: hidden;
             display: flex;
             flex-direction: column;
-            min-h-screen;
+            min-height: 100vh;
+            transition: background-color 0.4s ease, color 0.3s ease;
+        }
+
+        body.light-mode::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(236, 72, 153, 0.03) 0px, transparent 50%),
+                radial-gradient(at 50% 100%, rgba(34, 197, 94, 0.03) 0px, transparent 50%);
+            z-index: -1;
+            pointer-events: none;
         }
 
         #preloader {
@@ -67,27 +102,28 @@
         }
 
         .glass-card {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
-            border-radius: 24px;
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
         }
 
         .glass-card:hover {
-            transform: translateY(-4px);
-            border-color: rgba(99, 102, 241, 0.3);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            transform: translateY(-6px);
+            border-color: var(--primary);
+            box-shadow: 0 25px 30px -10px rgba(99, 102, 241, 0.15);
         }
 
         .hidden { display: none !important; }
 
         .view-transition {
-            animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px); }
+            from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
@@ -98,38 +134,28 @@
         }
 
         input, select, textarea {
-            background-color: #1e293b !important;
-            border: 1px solid #334155 !important;
-            color: white !important;
+            background-color: var(--input-bg) !important;
+            border: 1px solid var(--border) !important;
+            color: var(--text-main) !important;
+            border-radius: 12px !important;
+            padding: 10px 14px !important;
+            transition: all 0.2s ease !important;
         }
 
         .back-btn {
             display: flex;
             align-items: center;
             gap: 8px;
-            color: #94a3b8;
-            font-weight: 600;
-            font-size: 0.875rem;
-            transition: color 0.2s;
-            cursor: pointer;
-        }
-
-        .back-btn:hover {
-            color: white;
-        }
-
-        .date-input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-        
-        .date-input-group label {
-            font-size: 10px;
+            color: var(--text-muted);
             font-weight: 700;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 12px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            width: fit-content;
         }
 
         .edit-link {
@@ -138,19 +164,110 @@
             color: var(--primary);
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            padding: 4px 8px;
-            border-radius: 6px;
-            background: rgba(99, 102, 241, 0.1);
+            padding: 6px 12px;
+            border-radius: 10px;
+            background: rgba(99, 102, 241, 0.08);
             transition: all 0.2s;
         }
 
-        .edit-link:hover {
-            background: rgba(99, 102, 241, 0.2);
-            color: white;
+        .edit-link:hover { background: var(--primary); color: white; }
+
+        .stack-badge {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+        }
+
+        /* --- REDESIGNED PROFESSIONAL LAMP --- */
+        .lamp-interface {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            margin-top: -10px;
+        }
+
+        .lamp-fixture {
+            position: relative;
+            width: 50px;
+            height: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .lamp-shade {
+            width: 44px;
+            height: 20px;
+            background: linear-gradient(180deg, var(--fixture-color) 0%, #1e293b 100%);
+            clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
+            position: relative;
+            z-index: 10;
+            border-bottom: 2px solid rgba(0,0,0,0.2);
+        }
+
+        .lamp-bulb {
+            width: 18px;
+            height: 18px;
+            background: #fbbf24;
+            border-radius: 50%;
+            position: absolute;
+            top: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 5;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px #fbbf24, 0 0 10px #fbbf24;
+        }
+
+        body.light-mode .lamp-bulb {
+            background: #cbd5e1;
+            box-shadow: none;
+        }
+
+        .pull-rope {
+            position: absolute;
+            top: 20px;
+            right: 8px;
+            width: 2px;
+            height: 40px;
+            background: #64748b;
+            z-index: 2;
+            transition: height 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .rope-handle {
+            width: 10px;
+            height: 14px;
+            background: #475569;
+            border-radius: 4px;
+            position: absolute;
+            bottom: -10px;
+            left: -4px;
+            border: 1px solid #1e293b;
+        }
+
+        .lamp-fixture.pulling .pull-rope {
+            height: 55px;
+        }
+
+        .switch-label {
+            font-size: 9px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--text-muted);
+            pointer-events: none;
+            transition: color 0.3s ease;
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body>
 
     <!-- Preloader -->
     <div id="preloader">
@@ -163,166 +280,185 @@
 
     <!-- App Container -->
     <div id="app" class="flex flex-col flex-grow hidden">
-        <header class="sticky top-0 z-40 w-full bg-slate-900/80 backdrop-blur-md border-b border-slate-800">
+        <header class="sticky top-0 z-40 w-full bg-[var(--header-bg)] backdrop-blur-xl border-b border-[var(--border)] shadow-sm">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-24 flex items-center justify-between">
                 <div class="flex items-center gap-6" onclick="showView('dashboard')" style="cursor:pointer">
-                    <img src="https://image.s7.sfmc-content.com/lib/fe3e11717d64057d751472/m/1/2ddd9d88-4661-43a5-bf8f-809065b48367.png" alt="Logo" class="h-14 w-auto">
-                    <span class="font-bold text-white hidden md:block tracking-tight text-2xl">Performance Tracker</span>
+                    <img src="https://image.s7.sfmc-content.com/lib/fe3e11717d64057d751472/m/1/2ddd9d88-4661-43a5-bf8f-809065b48367.png" alt="Logo" class="h-14 w-auto drop-shadow-md">
+                    <span class="font-extrabold text-[var(--text-main)] hidden md:block tracking-tighter text-2xl">Performance Tracker</span>
                 </div>
                 
-                <div class="hidden xl:flex flex-col items-center gap-1 absolute left-1/2 -translate-x-1/2">
-                   <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Dashboard Date</span>
-                   <input type="date" id="dashboard-date-picker" onchange="renderDashboard()" class="bg-transparent border-none text-white font-bold text-lg p-0 cursor-pointer outline-none">
+                <div class="hidden lg:flex flex-col items-center gap-1 absolute left-1/2 -translate-x-1/2 bg-[var(--input-bg)] px-6 py-2 rounded-2xl border border-[var(--border)] shadow-sm">
+                   <span class="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-[0.2em]">View Date</span>
+                   <input type="date" id="dashboard-date-picker" onchange="renderDashboard()" class="bg-transparent border-none !p-0 !m-0 text-[var(--text-main)] font-bold text-base cursor-pointer outline-none">
                 </div>
 
-                <div class="flex items-center gap-4">
-                    <div id="top-revenue-badge" class="hidden lg:flex items-center bg-emerald-500/10 text-emerald-400 px-3 py-1.5 rounded-full text-xs font-bold border border-emerald-500/20">
-                        TOP REVENUE: <span id="top-et-name" class="ml-1 text-white">Loading...</span>
+                <div class="flex items-center gap-6">
+                    <!-- PROFESSIONAL LAMP INTERFACE -->
+                    <div class="lamp-interface">
+                        <div id="lamp-toggle" onclick="handleLampPull()" class="lamp-fixture" title="Pull to Switch Mode">
+                            <div class="lamp-shade"></div>
+                            <div class="lamp-bulb"></div>
+                            <div class="pull-rope">
+                                <div class="rope-handle"></div>
+                            </div>
+                        </div>
+                        <span class="switch-label">Switch Mode</span>
                     </div>
-                    <button onclick="showView('form')" class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-lg shadow-indigo-600/20 transition-all active:scale-95">
-                        Update Performance
+
+                    <button onclick="showView('form')" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl text-sm font-bold shadow-lg shadow-indigo-600/20 transition-all active:scale-95">
+                        New Performance
                     </button>
                 </div>
             </div>
         </header>
 
-        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 flex-grow">
-            
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 flex-grow">
             <!-- Dashboard -->
             <section id="view-dashboard" class="view-transition">
-                <div id="cards-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
-                <div class="mt-12 flex justify-center">
-                    <button onclick="showView('details')" class="flex items-center gap-2 text-indigo-400 font-bold hover:text-indigo-300 transition-colors py-3 px-8 rounded-full bg-indigo-500/5 border border-indigo-500/20">
-                        Detailed Performance Analytics
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>
+                <div id="cards-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"></div>
+                <div class="mt-16 flex justify-center">
+                    <button onclick="showView('details')" class="flex items-center gap-3 text-indigo-500 font-extrabold hover:text-indigo-400 transition-all py-4 px-10 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)] shadow-lg">
+                        Performance Analytics & Trends
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>
                     </button>
                 </div>
             </section>
 
             <!-- Update Form -->
-            <section id="view-form" class="view-transition hidden max-w-2xl mx-auto">
-                <div class="mb-6">
-                    <button onclick="showView('dashboard')" class="back-btn">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            <section id="view-form" class="view-transition hidden max-w-3xl mx-auto mb-12">
+                <div class="mb-8">
+                    <button onclick="showView('dashboard')" class="back-btn shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
                         Back to Dashboard
                     </button>
                 </div>
-                <div class="bg-slate-800 rounded-2xl shadow-2xl border border-slate-700 overflow-hidden">
-                    <div class="p-6 border-b border-slate-700 flex justify-between items-center">
-                        <h2 class="text-xl font-bold text-white">Update Performance</h2>
+                <div class="glass-card overflow-hidden">
+                    <div class="p-8 border-b border-[var(--border)] bg-gradient-to-r from-indigo-500/5 to-transparent">
+                        <h2 class="text-2xl font-extrabold text-[var(--text-main)]">Log Daily Performance</h2>
+                        <p class="text-sm text-[var(--text-muted)] mt-1">Submit technical metrics for the selected account</p>
                     </div>
-                    <form id="performance-form" class="p-6 space-y-4">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">ET Account</label>
-                                <select id="form-et-name" required class="w-full rounded-lg p-2.5 border outline-none focus:ring-2 focus:ring-indigo-500"></select>
+                    <form id="performance-form" class="p-8 space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="flex flex-col gap-2">
+                                <label class="text-xs font-black text-[var(--text-muted)] uppercase tracking-widest ml-1">ET Account</label>
+                                <select id="form-et-name" required class="w-full"></select>
                             </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Date</label>
-                                <input type="date" id="form-date" required class="w-full rounded-lg p-2.5 border outline-none">
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 ml-1">Open Rate Range</label>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <input type="number" step="0.01" id="form-low-or" placeholder="Low %" required class="rounded-lg p-2.5 border">
-                                    <input type="number" step="0.01" id="form-high-or" placeholder="High %" required class="rounded-lg p-2.5 border">
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 ml-1">Delivery Range</label>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <input type="number" step="0.01" id="form-low-del" placeholder="Low %" required class="rounded-lg p-2.5 border">
-                                    <input type="number" step="0.01" id="form-high-del" placeholder="High %" required class="rounded-lg p-2.5 border">
-                                </div>
+                            <div class="flex flex-col gap-2">
+                                <label class="text-xs font-black text-[var(--text-muted)] uppercase tracking-widest ml-1">Reporting Date</label>
+                                <input type="date" id="form-date" required class="w-full">
                             </div>
                         </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 ml-1">Mails Down</label>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <input type="number" id="form-del-down" placeholder="Del Down" required class="rounded-lg p-2.5 border">
-                                    <input type="number" id="form-or-down" placeholder="OR Down" required class="rounded-lg p-2.5 border">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="bg-[var(--bg-color)] p-5 rounded-2xl border border-[var(--border)] transition-colors">
+                                <label class="block text-[11px] font-black text-indigo-500 uppercase tracking-widest mb-4">Open Rate (OR) Range</label>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <input type="number" step="0.01" id="form-low-or" placeholder="Lowest %" required>
+                                    <input type="number" step="0.01" id="form-high-or" placeholder="Highest %" required>
                                 </div>
                             </div>
-                            <div>
-                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 ml-1">Revenue & Threshold</label>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <input type="number" step="0.01" id="form-revenue" placeholder="Revenue $" class="rounded-lg p-2.5 border font-bold text-emerald-400">
-                                    <input type="number" step="0.1" id="form-threshold" placeholder="Threshold %" required class="rounded-lg p-2.5 border">
+                            <div class="bg-[var(--bg-color)] p-5 rounded-2xl border border-[var(--border)] transition-colors">
+                                <label class="block text-[11px] font-black text-emerald-500 uppercase tracking-widest mb-4">Delivery Range</label>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <input type="number" step="0.01" id="form-low-del" placeholder="Lowest %" required>
+                                    <input type="number" step="0.01" id="form-high-del" placeholder="Highest %" required>
                                 </div>
                             </div>
                         </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Notes</label>
-                            <textarea id="form-notes" rows="3" placeholder="Add performance notes here..." class="w-full rounded-lg p-2.5 border outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="bg-[var(--bg-color)] p-5 rounded-2xl border border-[var(--border)] transition-colors">
+                                <label class="block text-[11px] font-black text-rose-500 uppercase tracking-widest mb-4">Mails Down Count</label>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <input type="number" id="form-del-down" placeholder="Del Down" required>
+                                    <input type="number" id="form-or-down" placeholder="OR Down" required>
+                                </div>
+                            </div>
+                            <div class="bg-[var(--bg-color)] p-5 rounded-2xl border border-[var(--border)] transition-colors">
+                                <label class="block text-[11px] font-black text-amber-500 uppercase tracking-widest mb-4">Performance Target</label>
+                                <input type="number" step="0.1" id="form-threshold" placeholder="Threshold %" required class="w-full">
+                            </div>
                         </div>
-                        <div class="pt-6 flex gap-3">
-                            <button type="submit" id="submit-btn" class="w-full py-3 bg-indigo-600 text-white rounded-lg font-bold transition-all hover:bg-indigo-500">Save Performance</button>
+                        <div class="flex flex-col gap-2">
+                            <label class="text-xs font-black text-[var(--text-muted)] uppercase tracking-widest ml-1">Account Notes</label>
+                            <textarea id="form-notes" rows="4" placeholder="Any specific performance observations..."></textarea>
+                        </div>
+                        <div class="pt-4">
+                            <button type="submit" id="submit-btn" class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-extrabold text-lg transition-all hover:bg-indigo-500 shadow-xl shadow-indigo-600/20 active:scale-[0.98]">
+                                Save Performance Record
+                            </button>
                         </div>
                     </form>
                 </div>
             </section>
 
             <!-- Analytics -->
-            <section id="view-details" class="view-transition hidden">
-                <div class="mb-6">
-                    <button onclick="showView('dashboard')" class="back-btn">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            <section id="view-details" class="view-transition hidden mb-12">
+                <div class="mb-8">
+                    <button onclick="showView('dashboard')" class="back-btn shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
                         Back to Dashboard
                     </button>
                 </div>
-                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-8 gap-6">
+                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-10 gap-6">
                     <div class="space-y-1">
-                        <h2 class="text-3xl font-bold text-white">Performance Analytics</h2>
-                        <p class="text-slate-400">Custom range performance trend tracking</p>
+                        <h2 class="text-4xl font-extrabold text-[var(--text-main)] tracking-tight">Analytics Lab</h2>
+                        <p class="text-[var(--text-muted)] font-medium">Historical performance audit and visual trend analysis</p>
                     </div>
                     
-                    <div class="flex flex-wrap items-end gap-4 bg-slate-800/40 p-4 rounded-2xl border border-slate-700/50 w-full lg:w-auto">
+                    <div class="flex flex-wrap items-end gap-6 bg-[var(--card-bg)] p-6 rounded-3xl border border-[var(--border)] w-full lg:w-auto shadow-md">
                         <div class="date-input-group">
-                            <label>Account</label>
-                            <select id="details-et-filter" onchange="renderDetails()" class="rounded-lg border-slate-700 px-3 py-2 bg-slate-800 text-white font-bold outline-none min-w-[140px]"></select>
+                            <label>Focus Account</label>
+                            <select id="details-et-filter" onchange="renderDetails()" class="min-w-[180px] font-extrabold"></select>
                         </div>
                         <div class="date-input-group">
-                            <label>Start Date</label>
-                            <input type="date" id="details-start-date" onchange="renderDetails()" class="rounded-lg px-3 py-2 outline-none">
+                            <label>From</label>
+                            <input type="date" id="details-start-date" onchange="renderDetails()">
                         </div>
                         <div class="date-input-group">
-                            <label>End Date</label>
-                            <input type="date" id="details-end-date" onchange="renderDetails()" class="rounded-lg px-3 py-2 outline-none">
+                            <label>To</label>
+                            <input type="date" id="details-end-date" onchange="renderDetails()">
                         </div>
                     </div>
                 </div>
 
-                <div id="today-detail-stats" class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8"></div>
+                <div id="today-detail-stats" class="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-10"></div>
                 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
-                        <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-6">Open Rate Trend (%)</h3>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="glass-card p-8 shadow-xl">
+                        <h3 class="text-xs font-black text-[var(--text-muted)] uppercase tracking-[0.2em] mb-8 flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-indigo-500"></span> Open Rate Trend (%)
+                        </h3>
                         <div class="chart-container"><canvas id="chart-or"></canvas></div>
                     </div>
-                    <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
-                        <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-6">Delivery Trend (%)</h3>
+                    <div class="glass-card p-8 shadow-xl">
+                        <h3 class="text-xs font-black text-[var(--text-muted)] uppercase tracking-[0.2em] mb-8 flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Delivery Trend (%)
+                        </h3>
                         <div class="chart-container"><canvas id="chart-delivery"></canvas></div>
                     </div>
-                    <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
-                        <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-6">OR Mails Down Trend</h3>
+                    <div class="glass-card p-8 shadow-xl">
+                        <h3 class="text-xs font-black text-[var(--text-muted)] uppercase tracking-[0.2em] mb-8 flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-amber-500"></span> OR Mails Down Trend
+                        </h3>
                         <div class="chart-container"><canvas id="chart-mails"></canvas></div>
                     </div>
-                    <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
-                        <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-6">Revenue Trend ($)</h3>
-                        <div class="chart-container"><canvas id="chart-overall"></canvas></div>
+                    <div class="glass-card p-8 shadow-xl">
+                        <h3 class="text-xs font-black text-[var(--text-muted)] uppercase tracking-[0.2em] mb-8 flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-rose-500"></span> Delivery Mails Down Trend
+                        </h3>
+                        <div class="chart-container"><canvas id="chart-del-down"></canvas></div>
                     </div>
                 </div>
             </section>
         </main>
 
         <!-- Footer -->
-        <footer class="mt-auto py-8 text-center text-slate-500 text-sm border-t border-slate-800 bg-slate-900/50">
-            <p class="font-medium tracking-wide">
-                Made with ❤️ | Ayush Srivastava(Full St. Dev)
-            </p>
+        <footer class="mt-auto py-12 text-center text-[var(--text-muted)] text-sm border-t border-[var(--border)] bg-[var(--header-bg)]">
+            <div class="max-w-7xl mx-auto px-4">
+                <p class="font-bold tracking-[0.1em] text-xs uppercase opacity-80 mb-2">Technical Dashboard Engine</p>
+                <p class="font-extrabold text-[var(--text-main)] text-base">
+                    Made with ❤️ | Ayush Srivastava <span class="text-indigo-500 font-black">(Full St. Dev)</span>
+                </p>
+            </div>
         </footer>
     </div>
 
@@ -331,18 +467,27 @@
         import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        const STACK_MAPPING = {
+            "JSG30": "STACK 7", "JSG26": "STACK 7", "JSG43": "STACK 13", "JSG53": "STACK 11",
+            "JSG47": "STACK 7", "JSG52": "STACK 12", "JSG48": "STACK 1", "JSG36": "STACK 6",
+            "JSG38N": "STACK 12", "JSG51": "STACK 11", "JSG 34C": "STACK 4", "JSG 34": "STACK 4",
+            "JSG41": "STACK 1", "JSG45": "STACK 1", "JSG 36 OLD": "STACK 6", "JSG 40": "STACK 12"
+        };
+
+        const ET_LIST = Object.keys(STACK_MAPPING).sort();
+
         const preloader = document.getElementById('preloader');
         const progressText = document.getElementById('progress-text');
         const loaderFill = document.getElementById('loader-fill');
         const mainApp = document.getElementById('app');
 
         const getTodayStr = () => new Date().toISOString().split('T')[0];
-        const formatDate = (d) => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const formatDate = (d) => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
         function startPreloader() {
             let progress = 0;
             const interval = setInterval(() => {
-                progress += Math.floor(Math.random() * 10) + 5;
+                progress += Math.floor(Math.random() * 12) + 4;
                 if (progress >= 100) {
                     progress = 100;
                     clearInterval(interval);
@@ -354,9 +499,9 @@
                         }, 500);
                     }, 400);
                 }
-                progressText.innerText = `LOADING PERFORMANCE ${progress}%`;
+                progressText.innerText = `INITIALIZING ENGINE ${progress}%`;
                 loaderFill.style.width = `${progress}%`;
-            }, 50);
+            }, 60);
         }
         startPreloader();
 
@@ -371,8 +516,6 @@
         };
 
         const appId = 'mm-performance-tracker';
-        const ET_LIST = ["JSG30", "JSG38N", "JSG34", "JSG36", "JSG 36 OLD", "JSG 40", "JSG 41", "JSG 43", "JSG 45", "JSG 47", "JSG 48", "JSG 51", "JSG 52", "JSG 53", "JSG 26", "JSG 34C"].sort();
-
         let appData = [];
         let charts = {};
         let auth, db;
@@ -382,6 +525,21 @@
             auth = getAuth(firebaseApp);
             db = getFirestore(firebaseApp);
         } catch (e) { console.error(e); }
+
+        window.handleLampPull = function() {
+            const lamp = document.getElementById('lamp-toggle');
+            lamp.classList.add('pulling');
+            setTimeout(() => {
+                lamp.classList.remove('pulling');
+                toggleTheme();
+            }, 150);
+        };
+
+        window.toggleTheme = function() {
+            const body = document.body;
+            body.classList.toggle('light-mode');
+            if (!document.getElementById('view-details').classList.contains('hidden')) renderDetails();
+        };
 
         const populateSelects = () => {
             const f = document.getElementById('form-et-name');
@@ -399,9 +557,7 @@
                 appData = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 appData.sort((a, b) => new Date(b.date) - new Date(a.date));
                 renderDashboard();
-                updateTopET();
-                const detailsView = document.getElementById('view-details');
-                if (!detailsView.classList.contains('hidden')) renderDetails();
+                if (!document.getElementById('view-details').classList.contains('hidden')) renderDetails();
             } catch (e) { console.error(e); }
         }
 
@@ -412,13 +568,15 @@
 
             ET_LIST.forEach(et => {
                 const entry = appData.find(d => d.etName === et && d.date === selectedDate);
+                const stack = STACK_MAPPING[et] || "NO STACK";
 
                 if (!entry) {
                     grid.innerHTML += `
-                        <div class="glass-card p-6 rounded-2xl text-center flex flex-col justify-center h-56 border-dashed border-slate-700">
-                            <div class="text-slate-600 mb-2">NO PERFORMANCE RECORD</div>
-                            <h3 class="text-lg font-bold text-slate-400">${et}</h3>
-                            <button onclick="openFormFor('${et}')" class="mt-4 text-xs font-bold text-indigo-400 hover:text-indigo-300">ADD PERFORMANCE</button>
+                        <div class="glass-card p-8 text-center flex flex-col justify-center h-72 border-dashed border-[var(--border)] transition-all">
+                            <div class="mb-2"><span class="stack-badge">${stack}</span></div>
+                            <h3 class="text-xl font-extrabold text-[var(--text-main)] mb-1">${et}</h3>
+                            <p class="text-[var(--text-muted)] text-xs font-medium mb-6 italic">Performance pending...</p>
+                            <button onclick="openFormFor('${et}')" class="mx-auto px-5 py-2.5 text-xs font-black text-indigo-500 bg-indigo-500/10 rounded-xl transition-all hover:bg-indigo-500 hover:text-white">ADD DATA</button>
                         </div>`;
                     return;
                 }
@@ -426,63 +584,51 @@
                 const isToday = entry.date === getTodayStr();
                 const lowOR = entry.lowestOR < entry.threshold;
                 const lowDel = entry.lowestDelivery < entry.threshold;
-                const revStr = entry.revenue !== undefined ? `$${entry.revenue.toLocaleString()}` : '-';
 
                 grid.innerHTML += `
-                    <div class="glass-card p-6 rounded-[24px] group">
-                        <div class="flex justify-between items-start mb-6">
+                    <div class="glass-card p-8 relative overflow-hidden group">
+                        <div class="flex justify-between items-start mb-8 relative z-10">
                             <div>
-                                <h3 class="text-2xl font-bold text-white">${entry.etName}</h3>
-                                <p class="text-[11px] text-slate-500 font-black uppercase tracking-wider mt-1">${isToday ? 'LIVE' : formatDate(entry.date)}</p>
+                                <span class="stack-badge mb-2 inline-block">${stack}</span>
+                                <h3 class="text-2xl font-black text-[var(--text-main)] tracking-tighter">${entry.etName}</h3>
+                                <p class="text-[10px] text-[var(--text-muted)] font-black uppercase tracking-[0.15em] mt-1.5 flex items-center gap-1.5">
+                                    <span class="w-1.5 h-1.5 rounded-full ${isToday ? 'bg-green-500 animate-pulse' : 'bg-slate-400'}"></span>
+                                    ${isToday ? 'LIVE TRACKING' : formatDate(entry.date)}
+                                </p>
                             </div>
                             <button onclick="editPerformance('${entry.id}')" class="edit-link">Edit</button>
                         </div>
-                        <div class="grid grid-cols-2 gap-y-6 gap-x-4 mb-6">
+                        <div class="grid grid-cols-2 gap-y-8 gap-x-4 mb-8 relative z-10">
                             <div>
-                                <p class="text-[10px] text-slate-500 font-black uppercase mb-1.5 tracking-widest">OR %</p>
-                                <p class="text-base font-bold ${lowOR ? 'text-rose-400' : 'text-slate-200'}">${entry.lowestOR}% - ${entry.highestOR}%</p>
+                                <p class="text-[9px] text-[var(--text-muted)] font-black uppercase mb-1.5 tracking-[0.1em]">Open Rate %</p>
+                                <p class="text-base font-extrabold ${lowOR ? 'text-rose-500' : 'text-[var(--text-main)]'}">${entry.lowestOR}% - ${entry.highestOR}%</p>
                             </div>
                             <div>
-                                <p class="text-[10px] text-slate-500 font-black uppercase mb-1.5 tracking-widest">DEL %</p>
-                                <p class="text-base font-bold ${lowDel ? 'text-rose-400' : 'text-slate-200'}">${entry.lowestDelivery}% - ${entry.highestDelivery}%</p>
+                                <p class="text-[9px] text-[var(--text-muted)] font-black uppercase mb-1.5 tracking-[0.1em]">Delivery %</p>
+                                <p class="text-base font-extrabold ${lowDel ? 'text-rose-500' : 'text-[var(--text-main)]'}">${entry.lowestDelivery}% - ${entry.highestDelivery}%</p>
                             </div>
                             <div>
-                                <p class="text-[10px] text-slate-500 font-black uppercase mb-1.5 tracking-widest">OR DOWN</p>
-                                <p class="text-base font-bold text-slate-200">${entry.orMailsDown || 0}</p>
+                                <p class="text-[9px] text-[var(--text-muted)] font-black uppercase mb-1.5 tracking-[0.1em]">OR Down</p>
+                                <p class="text-base font-extrabold text-[var(--text-main)]">${entry.orMailsDown || 0}</p>
                             </div>
                             <div>
-                                <p class="text-[10px] text-slate-500 font-black uppercase mb-1.5 tracking-widest">DEL DOWN</p>
-                                <p class="text-base font-bold text-slate-200">${entry.mailsDown || 0}</p>
-                            </div>
-                            <div>
-                                <p class="text-[10px] text-slate-500 font-black uppercase mb-1.5 tracking-widest">REVENUE</p>
-                                <p class="text-base font-bold text-emerald-400">${revStr}</p>
-                            </div>
-                            <div>
-                                <p class="text-[10px] text-slate-500 font-black uppercase mb-1.5 tracking-widest">Threshold</p>
-                                <p class="text-base font-bold text-indigo-400">${entry.threshold}%</p>
+                                <p class="text-[9px] text-[var(--text-muted)] font-black uppercase mb-1.5 tracking-[0.1em]">Del Down</p>
+                                <p class="text-base font-extrabold text-[var(--text-main)]">${entry.mailsDown || 0}</p>
                             </div>
                         </div>
-                        <div class="pt-4 border-t border-slate-700/50 flex flex-col gap-3">
-                            <div>
-                                <p class="text-[10px] text-slate-500 font-black uppercase mb-1 tracking-widest">NOTES</p>
-                                <p class="text-sm text-slate-300 leading-relaxed italic">${entry.notes || 'No notes available'}</p>
+                        <div class="pt-6 border-t border-[var(--border)] flex items-center justify-between relative z-10">
+                            <div class="flex flex-col">
+                                <span class="text-[9px] text-[var(--text-muted)] font-black uppercase tracking-[0.1em]">Notes</span>
+                                <p class="text-xs text-[var(--text-muted)] font-medium leading-relaxed italic line-clamp-1 mt-0.5">${entry.notes || '---'}</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-[9px] text-[var(--text-muted)] font-black uppercase tracking-[0.1em]">Target</span>
+                                <p class="text-xs font-black text-indigo-500">${entry.threshold}%</p>
                             </div>
                         </div>
+                        <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-indigo-500/5 rounded-full blur-3xl group-hover:bg-indigo-500/10 transition-all"></div>
                     </div>`;
             });
-        }
-
-        function updateTopET() {
-            const selectedDate = document.getElementById('dashboard-date-picker').value;
-            const entries = appData.filter(d => d.date === selectedDate && d.revenue !== undefined);
-            if (entries.length > 0) {
-                const top = [...entries].sort((a, b) => (b.revenue || 0) - (a.revenue || 0))[0];
-                document.getElementById('top-et-name').innerText = `${top.etName} ($${top.revenue.toLocaleString()})`;
-                document.getElementById('top-revenue-badge').classList.remove('hidden');
-            } else {
-                document.getElementById('top-revenue-badge').classList.add('hidden');
-            }
         }
 
         window.editPerformance = (id) => {
@@ -496,7 +642,6 @@
             document.getElementById('form-high-del').value = entry.highestDelivery;
             document.getElementById('form-del-down').value = entry.mailsDown;
             document.getElementById('form-or-down').value = entry.orMailsDown;
-            document.getElementById('form-revenue').value = entry.revenue || '';
             document.getElementById('form-threshold').value = entry.threshold;
             document.getElementById('form-notes').value = entry.notes || '';
             showView('form');
@@ -506,7 +651,7 @@
             document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
             document.getElementById(`view-${view}`).classList.remove('hidden');
             if (view === 'details') renderDetails();
-            window.scrollTo(0,0);
+            window.scrollTo({top: 0, behavior: 'smooth'});
         };
 
         window.openFormFor = (et) => {
@@ -516,16 +661,10 @@
             showView('form');
         };
 
-        window.viewDetailedET = (et) => {
-            document.getElementById('details-et-filter').value = et;
-            showView('details');
-        };
-
         document.getElementById('performance-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('submit-btn');
-            btn.disabled = true; btn.innerText = 'SAVING...';
-            const revenueVal = document.getElementById('form-revenue').value;
+            btn.disabled = true; btn.innerText = 'Syncing...';
             const entry = {
                 etName: document.getElementById('form-et-name').value, 
                 date: document.getElementById('form-date').value,
@@ -535,7 +674,6 @@
                 highestDelivery: parseFloat(document.getElementById('form-high-del').value),
                 mailsDown: parseInt(document.getElementById('form-del-down').value),
                 orMailsDown: parseInt(document.getElementById('form-or-down').value),
-                revenue: revenueVal !== '' ? parseFloat(revenueVal) : undefined,
                 threshold: parseFloat(document.getElementById('form-threshold').value),
                 notes: document.getElementById('form-notes').value,
                 createdAt: new Date().toISOString()
@@ -546,7 +684,7 @@
                 showView('dashboard');
                 e.target.reset();
             } catch (err) { console.error(err); }
-            finally { btn.disabled = false; btn.innerText = 'Save Performance'; }
+            finally { btn.disabled = false; btn.innerText = 'Save Performance Record'; }
         });
 
         window.renderDetails = function() {
@@ -560,30 +698,46 @@
             const stats = document.getElementById('today-detail-stats');
             const summaryEntry = history[history.length - 1];
             if (summaryEntry) {
-                const rev = summaryEntry.revenue !== undefined ? `$${summaryEntry.revenue.toLocaleString()}` : '-';
                 stats.innerHTML = `
-                    <div class="bg-indigo-500/10 border border-indigo-500/20 p-4 rounded-xl"><p class="text-[10px] text-indigo-400 uppercase font-black tracking-widest">Revenue (Last Entry)</p><p class="text-2xl font-bold text-emerald-400">${rev}</p></div>
-                    <div class="bg-slate-700/30 p-4 rounded-xl"><p class="text-[10px] text-slate-500 uppercase font-black tracking-widest">OR Range (Last)</p><p class="text-lg font-bold">${summaryEntry.lowestOR}% - ${summaryEntry.highestOR}%</p></div>
-                    <div class="bg-slate-700/30 p-4 rounded-xl"><p class="text-[10px] text-slate-500 uppercase font-black tracking-widest">Del Range (Last)</p><p class="text-lg font-bold">${summaryEntry.lowestDelivery}% - ${summaryEntry.highestDelivery}%</p></div>
-                    <div class="bg-slate-700/30 p-4 rounded-xl"><p class="text-[10px] text-slate-500 uppercase font-black tracking-widest">OR Mails Down</p><p class="text-xl font-bold">${summaryEntry.orMailsDown || 0}</p></div>`;
+                    <div class="glass-card p-6 border-l-4 border-l-indigo-500 shadow-lg">
+                        <p class="text-[10px] text-indigo-500 font-black uppercase tracking-widest mb-1">Architecture</p>
+                        <p class="text-2xl font-black">${STACK_MAPPING[et]}</p>
+                    </div>
+                    <div class="glass-card p-6 border-l-4 border-l-emerald-500 shadow-lg">
+                        <p class="text-[10px] text-emerald-500 font-black uppercase tracking-widest mb-1">Last OR Range</p>
+                        <p class="text-lg font-extrabold">${summaryEntry.lowestOR}% - ${summaryEntry.highestOR}%</p>
+                    </div>
+                    <div class="glass-card p-6 border-l-4 border-l-amber-500 shadow-lg">
+                        <p class="text-[10px] text-amber-500 font-black uppercase tracking-widest mb-1">Last Del Range</p>
+                        <p class="text-lg font-extrabold">${summaryEntry.lowestDelivery}% - ${summaryEntry.highestDelivery}%</p>
+                    </div>
+                    <div class="glass-card p-6 border-l-4 border-l-rose-500 shadow-lg">
+                        <p class="text-[10px] text-rose-500 font-black uppercase tracking-widest mb-1">Last OR Down</p>
+                        <p class="text-2xl font-black">${summaryEntry.orMailsDown || 0}</p>
+                    </div>`;
             } else { 
-                stats.innerHTML = `<div class="col-span-4 py-8 text-center text-slate-500 font-bold border border-dashed border-slate-700 rounded-xl tracking-widest">NO DATA FOR THIS ACCOUNT/RANGE</div>`; 
+                stats.innerHTML = `<div class="col-span-4 py-12 text-center text-[var(--text-muted)] font-black border-2 border-dashed border-[var(--border)] rounded-3xl tracking-widest uppercase">NO DATA STREAM FOR THIS RANGE</div>`; 
             }
-            const labels = history.map(d => formatDate(d.date));
+            const labels = history.map(d => formatDate(d.date).split(',')[0]);
             const datasets = [
                 { id: 'chart-or', label: 'Avg OR (%)', data: history.map(d => (d.lowestOR + d.highestOR)/2), color: '#6366f1' },
                 { id: 'chart-delivery', label: 'Avg Del (%)', data: history.map(d => (d.lowestDelivery + d.highestDelivery)/2), color: '#22c55e' },
-                { id: 'chart-mails', label: 'OR Mails Down', data: history.map(d => d.orMailsDown || 0), color: '#f59e0b' },
-                { id: 'chart-overall', label: 'Revenue Trend', data: history.map(d => d.revenue || 0), color: '#ec4899' }
+                { id: 'chart-mails', label: 'OR Down', data: history.map(d => d.orMailsDown || 0), color: '#f59e0b' },
+                { id: 'chart-del-down', label: 'Del Down', data: history.map(d => d.mailsDown || 0), color: '#ef4444' }
             ];
+            const isLight = document.body.classList.contains('light-mode');
             datasets.forEach(ds => {
                 const canvas = document.getElementById(ds.id);
                 if (!canvas) return;
                 if (charts[ds.id]) charts[ds.id].destroy();
                 charts[ds.id] = new Chart(canvas.getContext('2d'), {
                     type: 'line',
-                    data: { labels, datasets: [{ data: ds.data, borderColor: ds.color, backgroundColor: ds.color+'15', fill: true, tension: 0.4, pointRadius: 4 }] },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } }, x: { grid: { display: false }, ticks: { color: '#94a3b8' } } } }
+                    data: { labels, datasets: [{ data: ds.data, borderColor: ds.color, backgroundColor: ds.color+'10', fill: true, tension: 0.4, pointRadius: 5, pointHoverRadius: 7, pointBackgroundColor: ds.color, pointBorderColor: isLight ? '#fff' : '#0f172a', pointBorderWidth: 2 }] },
+                    options: { 
+                        responsive: true, maintainAspectRatio: false, 
+                        plugins: { legend: { display: false }, tooltip: { backgroundColor: isLight ? 'rgba(255,255,255,0.9)' : 'rgba(15,23,42,0.9)', titleColor: isLight ? '#0f172a' : '#fff', bodyColor: isLight ? '#0f172a' : '#fff', borderColor: ds.color, borderWidth: 1, padding: 12, cornerRadius: 10, displayColors: false } },
+                        scales: { y: { grid: { color: isLight ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.03)' }, ticks: { color: isLight ? '#64748b' : '#94a3b8', font: { weight: '600' } } }, x: { grid: { display: false }, ticks: { color: isLight ? '#64748b' : '#94a3b8', font: { weight: '600' } } } } 
+                    }
                 });
             });
         };

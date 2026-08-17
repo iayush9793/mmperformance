@@ -10,34 +10,18 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
         
         :root {
-            /* Default Dark Theme Variables */
-            --bg-color: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.7);
-            --header-bg: rgba(15, 23, 42, 0.8);
+            --bg-color: #f8fafc;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --header-bg: rgba(255, 255, 255, 0.85);
             --primary: #6366f1;
             --success: #22c55e;
             --warning: #f59e0b;
             --danger: #ef4444;
-            --border: rgba(255, 255, 255, 0.05);
-            --text-main: #f1f5f9;
-            --text-muted: #94a3b8;
-            --input-bg: #1e293b;
-            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
-            --lamp-glow: rgba(251, 191, 36, 0.15);
-            --fixture-color: #475569;
-        }
-
-        body.light-mode {
-            --bg-color: #f8fafc;
-            --card-bg: rgba(255, 255, 255, 0.9);
-            --header-bg: rgba(255, 255, 255, 0.8);
-            --border: rgba(99, 102, 241, 0.1);
+            --border: rgba(99, 102, 241, 0.12);
             --text-main: #0f172a;
             --text-muted: #64748b;
             --input-bg: #ffffff;
-            --shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.08), 0 8px 10px -6px rgba(99, 102, 241, 0.08);
-            --lamp-glow: transparent;
-            --fixture-color: #94a3b8;
+            --shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.06), 0 8px 10px -6px rgba(99, 102, 241, 0.04);
         }
 
         body {
@@ -49,10 +33,9 @@
             display: flex;
             flex-direction: column;
             min-height: 100vh;
-            transition: background-color 0.4s ease, color 0.3s ease;
         }
 
-        body.light-mode::before {
+        body::before {
             content: "";
             position: fixed;
             top: 0;
@@ -60,9 +43,9 @@
             width: 100%;
             height: 100%;
             background-image: 
-                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.05) 0px, transparent 50%),
-                radial-gradient(at 100% 0%, rgba(236, 72, 153, 0.03) 0px, transparent 50%),
-                radial-gradient(at 50% 100%, rgba(34, 197, 94, 0.03) 0px, transparent 50%);
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.06) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(236, 72, 153, 0.04) 0px, transparent 50%),
+                radial-gradient(at 50% 100%, rgba(34, 197, 94, 0.04) 0px, transparent 50%);
             z-index: -1;
             pointer-events: none;
         }
@@ -70,7 +53,7 @@
         #preloader {
             position: fixed;
             inset: 0;
-            background: #0f172a;
+            background: #ffffff;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -82,13 +65,13 @@
         .preloader-logo {
             width: 220px;
             margin-bottom: 32px;
-            filter: drop-shadow(0 0 15px rgba(99, 102, 241, 0.4));
+            filter: drop-shadow(0 4px 12px rgba(99, 102, 241, 0.2));
         }
 
         .loader-bar-container {
             width: 280px;
             height: 6px;
-            background: #1e293b;
+            background: #e2e8f0;
             border-radius: 10px;
             overflow: hidden;
         }
@@ -98,7 +81,7 @@
             background: var(--primary);
             width: 0%;
             transition: width 0.3s ease;
-            box-shadow: 0 0 15px var(--primary);
+            box-shadow: 0 0 10px var(--primary);
         }
 
         .glass-card {
@@ -106,24 +89,24 @@
             backdrop-filter: blur(16px);
             border: 1px solid var(--border);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border-radius: 28px;
+            border-radius: 24px;
             box-shadow: var(--shadow);
         }
 
         .glass-card:hover {
-            transform: translateY(-6px);
-            border-color: var(--primary);
-            box-shadow: 0 25px 30px -10px rgba(99, 102, 241, 0.15);
+            transform: translateY(-4px);
+            border-color: rgba(99, 102, 241, 0.3);
+            box-shadow: 0 25px 30px -10px rgba(99, 102, 241, 0.12);
         }
 
         .hidden { display: none !important; }
 
         .view-transition {
-            animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
+            from { opacity: 0; transform: translateY(14px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
@@ -135,11 +118,17 @@
 
         input, select, textarea {
             background-color: var(--input-bg) !important;
-            border: 1px solid var(--border) !important;
+            border: 1px solid #cbd5e1 !important;
             color: var(--text-main) !important;
             border-radius: 12px !important;
             padding: 10px 14px !important;
             transition: all 0.2s ease !important;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none !important;
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15) !important;
         }
 
         .back-btn {
@@ -156,6 +145,11 @@
             background: var(--card-bg);
             border: 1px solid var(--border);
             width: fit-content;
+        }
+
+        .back-btn:hover {
+            color: var(--text-main);
+            border-color: var(--primary);
         }
 
         .edit-link {
@@ -175,95 +169,22 @@
         .stack-badge {
             background: rgba(99, 102, 241, 0.1);
             color: var(--primary);
-            padding: 2px 8px;
+            padding: 3px 8px;
             border-radius: 6px;
             font-size: 10px;
             font-weight: 800;
             letter-spacing: 0.05em;
         }
 
-        /* --- REDESIGNED PROFESSIONAL LAMP --- */
-        .lamp-interface {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            margin-top: -10px;
-        }
-
-        .lamp-fixture {
-            position: relative;
-            width: 50px;
-            height: 60px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            cursor: pointer;
-        }
-
-        .lamp-shade {
-            width: 44px;
-            height: 20px;
-            background: linear-gradient(180deg, var(--fixture-color) 0%, #1e293b 100%);
-            clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
-            position: relative;
-            z-index: 10;
-            border-bottom: 2px solid rgba(0,0,0,0.2);
-        }
-
-        .lamp-bulb {
-            width: 18px;
-            height: 18px;
-            background: #fbbf24;
-            border-radius: 50%;
-            position: absolute;
-            top: 14px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 5;
-            transition: all 0.3s ease;
-            box-shadow: 0 10px 30px #fbbf24, 0 0 10px #fbbf24;
-        }
-
-        body.light-mode .lamp-bulb {
-            background: #cbd5e1;
-            box-shadow: none;
-        }
-
-        .pull-rope {
-            position: absolute;
-            top: 20px;
-            right: 8px;
-            width: 2px;
-            height: 40px;
-            background: #64748b;
-            z-index: 2;
-            transition: height 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .rope-handle {
-            width: 10px;
-            height: 14px;
-            background: #475569;
-            border-radius: 4px;
-            position: absolute;
-            bottom: -10px;
-            left: -4px;
-            border: 1px solid #1e293b;
-        }
-
-        .lamp-fixture.pulling .pull-rope {
-            height: 55px;
-        }
-
-        .switch-label {
-            font-size: 9px;
+        .avg-or-badge {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 10px;
             font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
-            color: var(--text-muted);
-            pointer-events: none;
-            transition: color 0.3s ease;
+            letter-spacing: 0.03em;
         }
     </style>
 </head>
@@ -272,7 +193,7 @@
     <!-- Preloader -->
     <div id="preloader">
         <img src="https://image.s7.sfmc-content.com/lib/fe3e11717d64057d751472/m/1/2ddd9d88-4661-43a5-bf8f-809065b48367.png" alt="Logo" class="preloader-logo">
-        <div id="progress-text" class="text-xs font-bold text-slate-400 mb-2 tracking-[0.2em]">LOADING PERFORMANCE 0%</div>
+        <div id="progress-text" class="text-xs font-bold text-slate-500 mb-2 tracking-[0.2em]">LOADING PERFORMANCE 0%</div>
         <div class="loader-bar-container">
             <div id="loader-fill" class="loader-bar-fill"></div>
         </div>
@@ -282,29 +203,17 @@
     <div id="app" class="flex flex-col flex-grow hidden">
         <header class="sticky top-0 z-40 w-full bg-[var(--header-bg)] backdrop-blur-xl border-b border-[var(--border)] shadow-sm">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-24 flex items-center justify-between">
-                <div class="flex items-center gap-6" onclick="showView('dashboard')" style="cursor:pointer">
-                    <img src="https://image.s7.sfmc-content.com/lib/fe3e11717d64057d751472/m/1/2ddd9d88-4661-43a5-bf8f-809065b48367.png" alt="Logo" class="h-14 w-auto drop-shadow-md">
+                <div class="flex items-center gap-6 cursor-pointer" onclick="showView('dashboard')">
+                    <img src="https://image.s7.sfmc-content.com/lib/fe3e11717d64057d751472/m/1/2ddd9d88-4661-43a5-bf8f-809065b48367.png" alt="Logo" class="h-12 w-auto drop-shadow-sm">
                     <span class="font-extrabold text-[var(--text-main)] hidden md:block tracking-tighter text-2xl">Performance Tracker</span>
                 </div>
                 
-                <div class="hidden lg:flex flex-col items-center gap-1 absolute left-1/2 -translate-x-1/2 bg-[var(--input-bg)] px-6 py-2 rounded-2xl border border-[var(--border)] shadow-sm">
+                <div class="hidden lg:flex flex-col items-center gap-1 absolute left-1/2 -translate-x-1/2 bg-white px-6 py-2 rounded-2xl border border-[var(--border)] shadow-sm">
                    <span class="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-[0.2em]">View Date</span>
-                   <input type="date" id="dashboard-date-picker" onchange="renderDashboard()" class="bg-transparent border-none !p-0 !m-0 text-[var(--text-main)] font-bold text-base cursor-pointer outline-none">
+                   <input type="date" id="dashboard-date-picker" onchange="renderDashboard()" class="bg-transparent !border-none !p-0 !m-0 text-[var(--text-main)] font-bold text-base cursor-pointer outline-none">
                 </div>
 
-                <div class="flex items-center gap-6">
-                    <!-- PROFESSIONAL LAMP INTERFACE -->
-                    <div class="lamp-interface">
-                        <div id="lamp-toggle" onclick="handleLampPull()" class="lamp-fixture" title="Pull to Switch Mode">
-                            <div class="lamp-shade"></div>
-                            <div class="lamp-bulb"></div>
-                            <div class="pull-rope">
-                                <div class="rope-handle"></div>
-                            </div>
-                        </div>
-                        <span class="switch-label">Switch Mode</span>
-                    </div>
-
+                <div class="flex items-center gap-4">
                     <button onclick="showView('form')" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl text-sm font-bold shadow-lg shadow-indigo-600/20 transition-all active:scale-95">
                         New Performance
                     </button>
@@ -317,7 +226,7 @@
             <section id="view-dashboard" class="view-transition">
                 <div id="cards-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"></div>
                 <div class="mt-16 flex justify-center">
-                    <button onclick="showView('details')" class="flex items-center gap-3 text-indigo-500 font-extrabold hover:text-indigo-400 transition-all py-4 px-10 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)] shadow-lg">
+                    <button onclick="showView('details')" class="flex items-center gap-3 text-indigo-600 font-extrabold hover:text-indigo-500 transition-all py-4 px-10 rounded-2xl bg-white border border-[var(--border)] shadow-lg">
                         Performance Analytics & Trends
                         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>
                     </button>
@@ -333,15 +242,21 @@
                     </button>
                 </div>
                 <div class="glass-card overflow-hidden">
-                    <div class="p-8 border-b border-[var(--border)] bg-gradient-to-r from-indigo-500/5 to-transparent">
-                        <h2 class="text-2xl font-extrabold text-[var(--text-main)]">Log Daily Performance</h2>
-                        <p class="text-sm text-[var(--text-muted)] mt-1">Submit technical metrics for the selected account</p>
+                    <div class="p-8 border-b border-[var(--border)] bg-gradient-to-r from-indigo-500/5 to-transparent flex justify-between items-center">
+                        <div>
+                            <h2 class="text-2xl font-extrabold text-[var(--text-main)]">Log Daily Performance</h2>
+                            <p class="text-sm text-[var(--text-muted)] mt-1">Submit technical metrics for the selected account</p>
+                        </div>
+                        <div id="form-avg-preview" class="hidden sm:block text-right">
+                            <span class="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-widest block">Avg OR Benchmark</span>
+                            <span id="form-avg-display" class="font-extrabold text-indigo-600 text-sm">--</span>
+                        </div>
                     </div>
                     <form id="performance-form" class="p-8 space-y-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="flex flex-col gap-2">
                                 <label class="text-xs font-black text-[var(--text-muted)] uppercase tracking-widest ml-1">ET Account</label>
-                                <select id="form-et-name" required class="w-full"></select>
+                                <select id="form-et-name" required class="w-full" onchange="updateFormAvgPreview()"></select>
                             </div>
                             <div class="flex flex-col gap-2">
                                 <label class="text-xs font-black text-[var(--text-muted)] uppercase tracking-widest ml-1">Reporting Date</label>
@@ -349,15 +264,15 @@
                             </div>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div class="bg-[var(--bg-color)] p-5 rounded-2xl border border-[var(--border)] transition-colors">
-                                <label class="block text-[11px] font-black text-indigo-500 uppercase tracking-widest mb-4">Open Rate (OR) Range</label>
+                            <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200">
+                                <label class="block text-[11px] font-black text-indigo-600 uppercase tracking-widest mb-4">Open Rate (OR) Range</label>
                                 <div class="grid grid-cols-2 gap-4">
                                     <input type="number" step="0.01" id="form-low-or" placeholder="Lowest %" required>
                                     <input type="number" step="0.01" id="form-high-or" placeholder="Highest %" required>
                                 </div>
                             </div>
-                            <div class="bg-[var(--bg-color)] p-5 rounded-2xl border border-[var(--border)] transition-colors">
-                                <label class="block text-[11px] font-black text-emerald-500 uppercase tracking-widest mb-4">Delivery Range</label>
+                            <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200">
+                                <label class="block text-[11px] font-black text-emerald-600 uppercase tracking-widest mb-4">Delivery Range</label>
                                 <div class="grid grid-cols-2 gap-4">
                                     <input type="number" step="0.01" id="form-low-del" placeholder="Lowest %" required>
                                     <input type="number" step="0.01" id="form-high-del" placeholder="Highest %" required>
@@ -365,15 +280,15 @@
                             </div>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div class="bg-[var(--bg-color)] p-5 rounded-2xl border border-[var(--border)] transition-colors">
-                                <label class="block text-[11px] font-black text-rose-500 uppercase tracking-widest mb-4">Mails Down Count</label>
+                            <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200">
+                                <label class="block text-[11px] font-black text-rose-600 uppercase tracking-widest mb-4">Mails Down Count</label>
                                 <div class="grid grid-cols-2 gap-4">
                                     <input type="number" id="form-del-down" placeholder="Del Down" required>
                                     <input type="number" id="form-or-down" placeholder="OR Down" required>
                                 </div>
                             </div>
-                            <div class="bg-[var(--bg-color)] p-5 rounded-2xl border border-[var(--border)] transition-colors">
-                                <label class="block text-[11px] font-black text-amber-500 uppercase tracking-widest mb-4">Performance Target</label>
+                            <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200">
+                                <label class="block text-[11px] font-black text-amber-600 uppercase tracking-widest mb-4">Performance Target</label>
                                 <input type="number" step="0.1" id="form-threshold" placeholder="Threshold %" required class="w-full">
                             </div>
                         </div>
@@ -404,23 +319,23 @@
                         <p class="text-[var(--text-muted)] font-medium">Historical performance audit and visual trend analysis</p>
                     </div>
                     
-                    <div class="flex flex-wrap items-end gap-6 bg-[var(--card-bg)] p-6 rounded-3xl border border-[var(--border)] w-full lg:w-auto shadow-md">
-                        <div class="date-input-group">
-                            <label>Focus Account</label>
+                    <div class="flex flex-wrap items-end gap-6 bg-white p-6 rounded-3xl border border-[var(--border)] w-full lg:w-auto shadow-md">
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">Focus Account</label>
                             <select id="details-et-filter" onchange="renderDetails()" class="min-w-[180px] font-extrabold"></select>
                         </div>
-                        <div class="date-input-group">
-                            <label>From</label>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">From</label>
                             <input type="date" id="details-start-date" onchange="renderDetails()">
                         </div>
-                        <div class="date-input-group">
-                            <label>To</label>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">To</label>
                             <input type="date" id="details-end-date" onchange="renderDetails()">
                         </div>
                     </div>
                 </div>
 
-                <div id="today-detail-stats" class="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-10"></div>
+                <div id="today-detail-stats" class="grid grid-cols-2 lg:grid-cols-5 gap-6 mb-10"></div>
                 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div class="glass-card p-8 shadow-xl">
@@ -452,11 +367,11 @@
         </main>
 
         <!-- Footer -->
-        <footer class="mt-auto py-12 text-center text-[var(--text-muted)] text-sm border-t border-[var(--border)] bg-[var(--header-bg)]">
+        <footer class="mt-auto py-12 text-center text-[var(--text-muted)] text-sm border-t border-[var(--border)] bg-white">
             <div class="max-w-7xl mx-auto px-4">
                 <p class="font-bold tracking-[0.1em] text-xs uppercase opacity-80 mb-2">Technical Dashboard Engine</p>
                 <p class="font-extrabold text-[var(--text-main)] text-base">
-                    Made with ❤️ | Ayush Srivastava <span class="text-indigo-500 font-black">(Full St. Dev)</span>
+                    Made with ❤️ | Ayush Srivastava <span class="text-indigo-600 font-black">(Full St. Dev)</span>
                 </p>
             </div>
         </footer>
@@ -465,14 +380,28 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Account & Stack Mapping
+        // Stack Mapping
         const STACK_MAPPING = {
             "JSG26": "STACK 7", "JSG43": "STACK 13", "JSG47NC": "STACK 7", 
             "JSG47METC": "STACK 7", "JSG48": "STACK 1", "JSG48METC": "STACK 1",
             "JSG53METNC": "STACK 11", "JSG 34NC": "STACK 4", "JSG50": "STACK 7",
             "JSG56": "STACK 11"
+        };
+
+        // Static Unchangeable Average OR Benchmarks
+        const AVG_OR_MAPPING = {
+            "JSG26": "30%",
+            "JSG43": "30%",
+            "JSG47NC": "RAW - 7%",
+            "JSG47METC": "45%",
+            "JSG48": "25%",
+            "JSG48METC": "50%",
+            "JSG53METNC": "RAW - 10% OP - 70%",
+            "JSG 34NC": "RAW - 7%",
+            "JSG50": "30%",
+            "JSG56": "45%"
         };
 
         const ET_LIST = Object.keys(STACK_MAPPING).sort();
@@ -527,28 +456,22 @@
             db = getFirestore(firebaseApp);
         } catch (e) { console.error(e); }
 
-        window.handleLampPull = function() {
-            const lamp = document.getElementById('lamp-toggle');
-            lamp.classList.add('pulling');
-            setTimeout(() => {
-                lamp.classList.remove('pulling');
-                toggleTheme();
-            }, 150);
-        };
-
-        window.toggleTheme = function() {
-            const body = document.body;
-            body.classList.toggle('light-mode');
-            if (!document.getElementById('view-details').classList.contains('hidden')) renderDetails();
+        window.updateFormAvgPreview = function() {
+            const et = document.getElementById('form-et-name').value;
+            const avgVal = AVG_OR_MAPPING[et] || '--';
+            document.getElementById('form-avg-display').innerText = avgVal;
         };
 
         const populateSelects = () => {
             const f = document.getElementById('form-et-name');
             const d = document.getElementById('details-et-filter');
+            f.innerHTML = '';
+            d.innerHTML = '';
             ET_LIST.forEach(et => {
                 f.innerHTML += `<option value="${et}">${et}</option>`;
                 d.innerHTML += `<option value="${et}">${et}</option>`;
             });
+            updateFormAvgPreview();
         };
 
         async function loadData() {
@@ -570,14 +493,22 @@
             ET_LIST.forEach(et => {
                 const entry = appData.find(d => d.etName === et && d.date === selectedDate);
                 const stack = STACK_MAPPING[et] || "NO STACK";
+                const avgOR = AVG_OR_MAPPING[et] || "N/A";
 
                 if (!entry) {
                     grid.innerHTML += `
-                        <div class="glass-card p-8 text-center flex flex-col justify-center h-72 border-dashed border-[var(--border)] transition-all">
-                            <div class="mb-2"><span class="stack-badge">${stack}</span></div>
-                            <h3 class="text-xl font-extrabold text-[var(--text-main)] mb-1">${et}</h3>
-                            <p class="text-[var(--text-muted)] text-xs font-medium mb-6 italic">Performance pending...</p>
-                            <button onclick="openFormFor('${et}')" class="mx-auto px-5 py-2.5 text-xs font-black text-indigo-500 bg-indigo-500/10 rounded-xl transition-all hover:bg-indigo-500 hover:text-white">ADD DATA</button>
+                        <div class="glass-card p-8 text-center flex flex-col justify-between min-h-[300px] border-dashed border-slate-300">
+                            <div>
+                                <div class="flex justify-between items-center mb-4">
+                                    <span class="stack-badge">${stack}</span>
+                                    <span class="avg-or-badge">Avg OR: ${avgOR}</span>
+                                </div>
+                                <h3 class="text-xl font-extrabold text-[var(--text-main)] mb-1">${et}</h3>
+                                <p class="text-[var(--text-muted)] text-xs font-medium italic">Performance pending...</p>
+                            </div>
+                            <div class="pb-2">
+                                <button onclick="openFormFor('${et}')" class="mx-auto px-5 py-2.5 text-xs font-black text-indigo-600 bg-indigo-50 rounded-xl transition-all hover:bg-indigo-600 hover:text-white">ADD DATA</button>
+                            </div>
                         </div>`;
                     return;
                 }
@@ -588,43 +519,48 @@
 
                 grid.innerHTML += `
                     <div class="glass-card p-8 relative overflow-hidden group">
-                        <div class="flex justify-between items-start mb-8 relative z-10">
+                        <div class="flex justify-between items-start mb-4 relative z-10">
                             <div>
-                                <span class="stack-badge mb-2 inline-block">${stack}</span>
+                                <div class="flex flex-wrap items-center gap-2 mb-2">
+                                    <span class="stack-badge">${stack}</span>
+                                    <span class="avg-or-badge">Avg: ${avgOR}</span>
+                                </div>
                                 <h3 class="text-2xl font-black text-[var(--text-main)] tracking-tighter">${entry.etName}</h3>
-                                <p class="text-[10px] text-[var(--text-muted)] font-black uppercase tracking-[0.15em] mt-1.5 flex items-center gap-1.5">
+                                <p class="text-[10px] text-[var(--text-muted)] font-black uppercase tracking-[0.15em] mt-1 flex items-center gap-1.5">
                                     <span class="w-1.5 h-1.5 rounded-full ${isToday ? 'bg-green-500 animate-pulse' : 'bg-slate-400'}"></span>
                                     ${isToday ? 'LIVE TRACKING' : formatDate(entry.date)}
                                 </p>
                             </div>
                             <button onclick="editPerformance('${entry.id}')" class="edit-link">Edit</button>
                         </div>
-                        <div class="grid grid-cols-2 gap-y-8 gap-x-4 mb-8 relative z-10">
+
+                        <div class="grid grid-cols-2 gap-y-6 gap-x-4 my-6 relative z-10">
                             <div>
-                                <p class="text-[9px] text-[var(--text-muted)] font-black uppercase mb-1.5 tracking-[0.1em]">Open Rate %</p>
+                                <p class="text-[9px] text-[var(--text-muted)] font-black uppercase mb-1 tracking-[0.1em]">Open Rate %</p>
                                 <p class="text-base font-extrabold ${lowOR ? 'text-rose-500' : 'text-[var(--text-main)]'}">${entry.lowestOR}% - ${entry.highestOR}%</p>
                             </div>
                             <div>
-                                <p class="text-[9px] text-[var(--text-muted)] font-black uppercase mb-1.5 tracking-[0.1em]">Delivery %</p>
+                                <p class="text-[9px] text-[var(--text-muted)] font-black uppercase mb-1 tracking-[0.1em]">Delivery %</p>
                                 <p class="text-base font-extrabold ${lowDel ? 'text-rose-500' : 'text-[var(--text-main)]'}">${entry.lowestDelivery}% - ${entry.highestDelivery}%</p>
                             </div>
                             <div>
-                                <p class="text-[9px] text-[var(--text-muted)] font-black uppercase mb-1.5 tracking-[0.1em]">OR Down</p>
+                                <p class="text-[9px] text-[var(--text-muted)] font-black uppercase mb-1 tracking-[0.1em]">OR Down</p>
                                 <p class="text-base font-extrabold text-[var(--text-main)]">${entry.orMailsDown || 0}</p>
                             </div>
                             <div>
-                                <p class="text-[9px] text-[var(--text-muted)] font-black uppercase mb-1.5 tracking-[0.1em]">Del Down</p>
+                                <p class="text-[9px] text-[var(--text-muted)] font-black uppercase mb-1 tracking-[0.1em]">Del Down</p>
                                 <p class="text-base font-extrabold text-[var(--text-main)]">${entry.mailsDown || 0}</p>
                             </div>
                         </div>
-                        <div class="pt-6 border-t border-[var(--border)] flex items-center justify-between relative z-10">
+
+                        <div class="pt-5 border-t border-slate-100 flex items-center justify-between relative z-10">
                             <div class="flex flex-col">
                                 <span class="text-[9px] text-[var(--text-muted)] font-black uppercase tracking-[0.1em]">Notes</span>
                                 <p class="text-xs text-[var(--text-muted)] font-medium leading-relaxed italic line-clamp-1 mt-0.5">${entry.notes || '---'}</p>
                             </div>
                             <div class="text-right">
                                 <span class="text-[9px] text-[var(--text-muted)] font-black uppercase tracking-[0.1em]">Target</span>
-                                <p class="text-xs font-black text-indigo-500">${entry.threshold}%</p>
+                                <p class="text-xs font-black text-indigo-600">${entry.threshold}%</p>
                             </div>
                         </div>
                         <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-indigo-500/5 rounded-full blur-3xl group-hover:bg-indigo-500/10 transition-all"></div>
@@ -636,6 +572,7 @@
             const entry = appData.find(d => d.id === id);
             if (!entry) return;
             document.getElementById('form-et-name').value = entry.etName;
+            updateFormAvgPreview();
             document.getElementById('form-date').value = entry.date;
             document.getElementById('form-low-or').value = entry.lowestOR;
             document.getElementById('form-high-or').value = entry.highestOR;
@@ -658,6 +595,7 @@
         window.openFormFor = (et) => {
             document.getElementById('performance-form').reset();
             document.getElementById('form-et-name').value = et;
+            updateFormAvgPreview();
             document.getElementById('form-date').value = getTodayStr();
             showView('form');
         };
@@ -696,29 +634,37 @@
             if (start) history = history.filter(d => d.date >= start);
             if (end) history = history.filter(d => d.date <= end);
             history.sort((a,b) => new Date(a.date) - new Date(b.date));
+            
             const stats = document.getElementById('today-detail-stats');
             const summaryEntry = history[history.length - 1];
+            const avgOR = AVG_OR_MAPPING[et] || "N/A";
+
             if (summaryEntry) {
                 stats.innerHTML = `
                     <div class="glass-card p-6 border-l-4 border-l-indigo-500 shadow-lg">
-                        <p class="text-[10px] text-indigo-500 font-black uppercase tracking-widest mb-1">Architecture</p>
-                        <p class="text-2xl font-black">${STACK_MAPPING[et]}</p>
+                        <p class="text-[10px] text-indigo-600 font-black uppercase tracking-widest mb-1">Architecture</p>
+                        <p class="text-xl font-black">${STACK_MAPPING[et]}</p>
+                    </div>
+                    <div class="glass-card p-6 border-l-4 border-l-violet-500 shadow-lg">
+                        <p class="text-[10px] text-violet-600 font-black uppercase tracking-widest mb-1">Benchmark Avg OR</p>
+                        <p class="text-base font-black">${avgOR}</p>
                     </div>
                     <div class="glass-card p-6 border-l-4 border-l-emerald-500 shadow-lg">
-                        <p class="text-[10px] text-emerald-500 font-black uppercase tracking-widest mb-1">Last OR Range</p>
-                        <p class="text-lg font-extrabold">${summaryEntry.lowestOR}% - ${summaryEntry.highestOR}%</p>
+                        <p class="text-[10px] text-emerald-600 font-black uppercase tracking-widest mb-1">Last OR Range</p>
+                        <p class="text-base font-extrabold">${summaryEntry.lowestOR}% - ${summaryEntry.highestOR}%</p>
                     </div>
                     <div class="glass-card p-6 border-l-4 border-l-amber-500 shadow-lg">
-                        <p class="text-[10px] text-amber-500 font-black uppercase tracking-widest mb-1">Last Del Range</p>
-                        <p class="text-lg font-extrabold">${summaryEntry.lowestDelivery}% - ${summaryEntry.highestDelivery}%</p>
+                        <p class="text-[10px] text-amber-600 font-black uppercase tracking-widest mb-1">Last Del Range</p>
+                        <p class="text-base font-extrabold">${summaryEntry.lowestDelivery}% - ${summaryEntry.highestDelivery}%</p>
                     </div>
                     <div class="glass-card p-6 border-l-4 border-l-rose-500 shadow-lg">
-                        <p class="text-[10px] text-rose-500 font-black uppercase tracking-widest mb-1">Last OR Down</p>
-                        <p class="text-2xl font-black">${summaryEntry.orMailsDown || 0}</p>
+                        <p class="text-[10px] text-rose-600 font-black uppercase tracking-widest mb-1">Last OR Down</p>
+                        <p class="text-xl font-black">${summaryEntry.orMailsDown || 0}</p>
                     </div>`;
             } else { 
-                stats.innerHTML = `<div class="col-span-4 py-12 text-center text-[var(--text-muted)] font-black border-2 border-dashed border-[var(--border)] rounded-3xl tracking-widest uppercase">NO DATA STREAM FOR THIS RANGE</div>`; 
+                stats.innerHTML = `<div class="col-span-2 lg:col-span-5 py-12 text-center text-[var(--text-muted)] font-black border-2 border-dashed border-slate-200 rounded-3xl tracking-widest uppercase">NO DATA STREAM FOR THIS RANGE (Avg Benchmark: ${avgOR})</div>`; 
             }
+
             const labels = history.map(d => formatDate(d.date).split(',')[0]);
             const datasets = [
                 { id: 'chart-or', label: 'Avg OR (%)', data: history.map(d => (d.lowestOR + d.highestOR)/2), color: '#6366f1' },
@@ -726,18 +672,24 @@
                 { id: 'chart-mails', label: 'OR Down', data: history.map(d => d.orMailsDown || 0), color: '#f59e0b' },
                 { id: 'chart-del-down', label: 'Del Down', data: history.map(d => d.mailsDown || 0), color: '#ef4444' }
             ];
-            const isLight = document.body.classList.contains('light-mode');
+
             datasets.forEach(ds => {
                 const canvas = document.getElementById(ds.id);
                 if (!canvas) return;
                 if (charts[ds.id]) charts[ds.id].destroy();
                 charts[ds.id] = new Chart(canvas.getContext('2d'), {
                     type: 'line',
-                    data: { labels, datasets: [{ data: ds.data, borderColor: ds.color, backgroundColor: ds.color+'10', fill: true, tension: 0.4, pointRadius: 5, pointHoverRadius: 7, pointBackgroundColor: ds.color, pointBorderColor: isLight ? '#fff' : '#0f172a', pointBorderWidth: 2 }] },
+                    data: { labels, datasets: [{ data: ds.data, borderColor: ds.color, backgroundColor: ds.color+'15', fill: true, tension: 0.4, pointRadius: 5, pointHoverRadius: 7, pointBackgroundColor: ds.color, pointBorderColor: '#ffffff', pointBorderWidth: 2 }] },
                     options: { 
                         responsive: true, maintainAspectRatio: false, 
-                        plugins: { legend: { display: false }, tooltip: { backgroundColor: isLight ? 'rgba(255,255,255,0.9)' : 'rgba(15,23,42,0.9)', titleColor: isLight ? '#0f172a' : '#fff', bodyColor: isLight ? '#0f172a' : '#fff', borderColor: ds.color, borderWidth: 1, padding: 12, cornerRadius: 10, displayColors: false } },
-                        scales: { y: { grid: { color: isLight ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.03)' }, ticks: { color: isLight ? '#64748b' : '#94a3b8', font: { weight: '600' } } }, x: { grid: { display: false }, ticks: { color: isLight ? '#64748b' : '#94a3b8', font: { weight: '600' } } } } 
+                        plugins: { 
+                            legend: { display: false }, 
+                            tooltip: { backgroundColor: 'rgba(255,255,255,0.95)', titleColor: '#0f172a', bodyColor: '#0f172a', borderColor: ds.color, borderWidth: 1, padding: 12, cornerRadius: 10, displayColors: false } 
+                        },
+                        scales: { 
+                            y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { color: '#64748b', font: { weight: '600' } } }, 
+                            x: { grid: { display: false }, ticks: { color: '#64748b', font: { weight: '600' } } } 
+                        } 
                     }
                 });
             });
